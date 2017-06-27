@@ -209,6 +209,7 @@ ExpandKey128 start
 	using	tables
 
 	ldx	#16
+	clc
 
 top	anop
 	ShortRegs
@@ -239,26 +240,20 @@ top	anop
 	lda	rk+0,x
 	eor	rk+0+4-16,x
 	sta	rk+0+4,x
+	eor	rk+4+4-16,x
+	sta	rk+4+4,x
+	eor	rk+8+4-16,x
+	sta	rk+8+4,x
+	
 	lda	rk+2,x
 	eor	rk+2+4-16,x
 	sta	rk+2+4,x
-
-	lda	rk+4,x
-	eor	rk+4+4-16,x
-	sta	rk+4+4,x
-	lda	rk+6,x
 	eor	rk+6+4-16,x
 	sta	rk+6+4,x
-
-	lda	rk+8,x
-	eor	rk+8+4-16,x
-	sta	rk+8+4,x
-	lda	rk+10,x
 	eor	rk+10+4-16,x
 	sta	rk+10+4,x
 
 	txa
-	clc
 	adc	#16
 	tax
 	cmp	#16*12
