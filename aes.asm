@@ -345,17 +345,27 @@ aes192_decrypt start
 	CFunction AES192_DECRYPT
 	end
 
-AES192_DECRYPT start
+aes256_decrypt start
+	CFunction AES256_DECRYPT
+	end
+
+AES256_DECRYPT start
 	using	tables
-	
+	InvFinalRound 14
+	InvNormalRound 13
+	InvNormalRound 12
+	jmp	cont1
+
+AES192_DECRYPT entry
 	InvFinalRound 12
+cont1	anop
 	InvNormalRound 11
 	InvNormalRound 10
-	jmp	cont
+	jmp	cont2
 	
 AES128_DECRYPT entry
 	InvFinalRound 10
-cont	anop
+cont2	anop
 	InvNormalRound 9
 	InvNormalRound 8
 	InvNormalRound 7

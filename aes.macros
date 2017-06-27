@@ -246,7 +246,13 @@
 	
 .loop
 	lda	&state+&i
+	aif	(rk+&round*16+&i)>255,.bigindex
 	eor	rk+&round*16+&i
+	ago	.cont
+.bigindex
+	ldx	#&round*16+&i
+	eor	rk,X
+.cont
 	sta	&state+&i
 &i	seta	&i+2
 	aif	&i<16,.loop
@@ -319,7 +325,13 @@
 	InvFinalRoundStep &to,&from
 	
 	lda	state1+&from
+	aif	(rk+&round*16+&from)>255,.bigindex
 	eor	rk+&round*16+&from
+	ago	.cont
+.bigindex
+	ldx	#&round*16+&from
+	eor	rk,X
+.cont
 	tay
 	lda	InvSbox,Y
 	sta	state2+&to

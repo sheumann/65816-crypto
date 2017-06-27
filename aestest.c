@@ -98,6 +98,10 @@ void aes256_test(void) {
     aes_encrypt(&aes_state);
     
     print_hexbytes("Output:       ", aes_state.data, 16);
+
+    aes256_decrypt(&aes_state);
+    
+    print_hexbytes("Decrypted:    ", aes_state.data, 16);
 }
 
 unsigned long aes128_time_test(unsigned int iters) {
