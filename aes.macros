@@ -31,44 +31,38 @@
 	macro
 	MixColumn &i,&A,&B,&C,&D,&state,&out
 	
-	ldy	&state+&A
-	lda	Xtime2Sbox,Y
+	ldx	&state+&A
+	lda	Xtime2Sbox,X
 	ldy	&state+&B
 	eor	Xtime3Sbox,Y
-	ldy	&state+&C
-	eor	Sbox,Y
 	ldy	&state+&D
+	eor	Sbox,Y
+	ldy	&state+&C
 	eor	Sbox,Y
 	eor	rk+&round*16+&i
 	sta	&out+&i
-	
-	ldy	&state+&A
-	lda	Sbox,Y
+
+	lda	Xtime3Sbox,Y	
+	eor	Sbox,X
 	ldy	&state+&B
 	eor	Xtime2Sbox,Y
-	ldy	&state+&C
-	eor	Xtime3Sbox,Y
 	ldy	&state+&D
 	eor	Sbox,Y
 	eor	rk+&round*16+&i+1
 	sta	&out+&i+1
-	
-	ldy	&state+&A
-	lda	Sbox,Y
+
+	lda	Xtime3Sbox,Y
+	eor	Sbox,X
 	ldy	&state+&B
 	eor	Sbox,Y
 	ldy	&state+&C
 	eor	Xtime2Sbox,Y
-	ldy	&state+&D
-	eor	Xtime3Sbox,Y
 	eor	rk+&round*16+&i+2
 	sta	&out+&i+2
-	
-	ldy	&state+&A
-	lda	Xtime3Sbox,Y
+
+	lda	Sbox,Y
+	eor	Xtime3Sbox,X
 	ldy	&state+&B
-	eor	Sbox,Y
-	ldy	&state+&C
 	eor	Sbox,Y
 	ldy	&state+&D
 	eor	Xtime2Sbox,Y
