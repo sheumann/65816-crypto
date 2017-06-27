@@ -166,16 +166,19 @@ XtimeE	anop
 	dc h'd7 d9 cb c5 ef e1 f3 fd a7 a9 bb b5 9f 91 83 8d'
 
 Rcon	anop
-	dc h'01 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00'
-	dc h'02 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00'
-	dc h'04 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00'
-	dc h'08 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00'
-	dc h'10 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00'
+	dc h'01 01 01 00 00 00 00 00 00 00 00 00 00 00 00 00'
+	dc h'02 00 00 00 00 00 00 00 00 02 00 00 00 00 00 00'
+	dc h'04 00 02 00 00 00 00 00 00 00 00 00 00 00 00 00'
+	dc h'08 04 00 00 00 00 00 00 00 00 00 00 00 00 00 00'
+	dc h'10 00 04 00 00 00 00 00 00 08 00 00 00 00 00 00'
 	dc h'20 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00'
-	dc h'40 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00'
-	dc h'80 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00'
-	dc h'1b 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00'
-	dc h'36 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00'
+	dc h'40 10 08 00 00 00 00 00 00 00 00 00 00 00 00 00'
+	dc h'80 00 00 00 00 00 00 00 00 20 00 00 00 00 00 00'
+	dc h'1b 00 10 00 00 00 00 00 00 00 00 00 00 00 00 00'
+	dc h'36 40 00 00 00 00 00 00 00 00 00 00 00 00 00 00'
+	dc h'6c 00 20 00 00 00 00 00 00 80 00 00 00 00 00 00'
+	dc h'd8 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00'
+	dc h'ab 1b 40'
 	end
 
 state1	gequ	0
@@ -183,101 +186,104 @@ state2	gequ	16
 keysize	gequ	32
 rk	gequ	33
 
+* Constants used for keysize
+keysize_128 gequ 0
+keysize_192 gequ 64
+keysize_256 gequ 128
+
 
 * Callable from C, with state structure pointer on stack.
 aes_expandkey128 start
-	phb
-	plx
-	ply
-	tdc
-	pld
-	plb
-	plb
-	phy
-	phx
-	plb
-	pha
-	jsl	ExpandKey128
-	pld
-	rtl
+	CFunction ExpandKey128
 	end
 
+aes_expandkey192 start
+	CFunction ExpandKey192
+	end
+
+aes_expandkey256 start
+	CFunction ExpandKey256
+	end
 
 * Call with DP = AES state structure (with key expanded),
-*           DP = bank containing AES tables.
+*           DB = bank containing AES tables.
 ExpandKey128 start
 	using	tables
 
+	stz	keysize-1		;keysize_128
+	
 	ldx	#16
 	clc
 
 top	anop
-	ShortRegs
-	
-	ldy	rk-3,x
-	lda	Sbox,y
-	eor	Rcon-16,x
-	eor	rk-16,x
-	sta	rk,x
-	
-	ldy	rk-2,x
-	lda	Sbox,y
-	eor	rk+1-16,x
-	sta	rk+1,x
-	
-	ldy	rk-1,x
-	lda	Sbox,y
-	eor	rk+2-16,x
-	sta	rk+2,x
-	
-	ldy	rk-4,x
-	lda	Sbox,y
-	eor	rk+3-16,x
-	sta	rk+3,x
-
-	LongRegs
-
-	lda	rk+0,x
-	eor	rk+0+4-16,x
-	sta	rk+0+4,x
-	eor	rk+4+4-16,x
-	sta	rk+4+4,x
-	eor	rk+8+4-16,x
-	sta	rk+8+4,x
-	
-	lda	rk+2,x
-	eor	rk+2+4-16,x
-	sta	rk+2+4,x
-	eor	rk+6+4-16,x
-	sta	rk+6+4,x
-	eor	rk+10+4-16,x
-	sta	rk+10+4,x
+	ExpandKeyCore 16,0
+	ExpandKeyIter 16,3
 
 	txa
 	adc	#16
 	tax
-	cmp	#16*12
+	cmp	#16*11
 	blt	top
 	rtl
 	end
 
 
+ExpandKey192 start
+	using	tables
+
+	lda	#keysize_192|8
+	sta	keysize-1
+
+	ldx	#24
+	clc
+
+top	anop
+	ExpandKeyCore 24,1
+	ExpandKeyIter 24,5
+
+	txa
+	adc	#24
+	tax
+	cmp	#16*13
+	blt	top
+	rtl
+	end
+
+
+ExpandKey256 start
+	using	tables
+	
+	lda	#keysize_256|8
+	sta	keysize-1
+
+	ldx	#32
+	clc
+
+top	anop
+	ExpandKeyCore 32,2
+	ExpandKeyIter 32,3
+
+	txa
+	adc	#16
+	tax
+	cmp	#16*15
+	bge	done
+
+	ExpandKeySubst 32,2
+	ExpandKeyIter 32,3
+
+	txa
+	adc	#16
+	tax
+	brl	top
+
+done	rtl
+	end
+
+
 * Callable from C, with state structure pointer on stack.
 aes_encrypt start
-	phb
-	plx
-	ply
-	tdc
-	pld
-	plb
-	plb
-	phy
-	phx
-	plb
-	pha
-	jsl	AES_ENCRYPT
-	pld
-	rtl
+	CFunction AES_ENCRYPT
 	end
 
 
@@ -299,12 +305,33 @@ AES_ENCRYPT start
 	NormalRound 7
 	NormalRound 8
 	NormalRound 9
-
-	FinalRound 10
 	
-	LongRegs
+	lda	keysize
+	bne	cont1
+	jmp	finish_aes128
 
+cont1	NormalRound 10
+	NormalRound 11
+
+	lda	keysize
+	bmi	cont2
+	jmp	finish_aes192
+	
+cont2	NormalRound 12
+	NormalRound 13
+
+finish_aes256 anop
+	FinalRound 14
+	LongRegs
+	rtl
+
+finish_aes192 anop
+	FinalRound 12
+	LongRegs
+	rtl
+
+finish_aes128 anop
+	FinalRound 10
+	LongRegs
 	rtl
 	end
-
-

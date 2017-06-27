@@ -1,3 +1,105 @@
+* This makes a function wrapper that is callable from C,
+* taking a pointer to the state structure as its argument.
+	macro
+	CFunction &fn
+	phb
+	plx
+	ply
+	tdc
+	pld
+	plb
+	plb
+	phy
+	phx
+	plb
+	pha
+	jsl	&fn
+	pld
+	rtl
+	mend
+
+
+	macro
+	ExpandKeyCore &xorback,&rconoffset
+
+	ShortRegs
+	
+	ldy	rk-3,x
+	lda	Sbox,y
+	eor	Rcon-&xorback+&rconoffset,x
+	eor	rk-&xorback,x
+	sta	rk,x
+	
+	ldy	rk-2,x
+	lda	Sbox,y
+	eor	rk+1-&xorback,x
+	sta	rk+1,x
+	
+	ldy	rk-1,x
+	lda	Sbox,y
+	eor	rk+2-&xorback,x
+	sta	rk+2,x
+	
+	ldy	rk-4,x
+	lda	Sbox,y
+	eor	rk+3-&xorback,x
+	sta	rk+3,x
+
+	LongRegs
+
+	mend
+
+* Secondary substitution step used when expanding AES-256 keys
+	macro
+	ExpandKeySubst &xorback,&rconoffset
+
+	ShortRegs
+	
+	ldy	rk-4,x
+	lda	Sbox,y
+	eor	rk-&xorback,x
+	sta	rk,x
+	
+	ldy	rk+1-4,x
+	lda	Sbox,y
+	eor	rk+1-&xorback,x
+	sta	rk+1,x
+	
+	ldy	rk+2-4,x
+	lda	Sbox,y
+	eor	rk+2-&xorback,x
+	sta	rk+2,x
+	
+	ldy	rk+3-4,x
+	lda	Sbox,y
+	eor	rk+3-&xorback,x
+	sta	rk+3,x
+
+	LongRegs
+
+	mend
+
+
+	macro
+	ExpandKeyIter &xorback,&nwords
+	lcla	&i
+	lda	rk,x
+.loop1
+	eor	rk+&i+4-&xorback,x
+	sta	rk+&i+4,x
+&i	seta	&i+4
+	aif	&i/4<&nwords,.loop1
+
+&i	seta	2
+	lda	rk+2,x
+.loop2
+	eor	rk+&i+4-&xorback,x
+	sta	rk+&i+4,x
+&i	seta	&i+4
+	aif	&i/4<&nwords,.loop2
+	mend
+
+
 	macro
 	AddInitialRoundKey
 	lcla	&i
@@ -11,8 +113,8 @@
 
 
 	macro
-	NormalRound &round
-
+&lbl	NormalRound &round
+&lbl	anop
 	aif	&round/2*2=&round,.evenround
 	MixColumn 0,0,5,10,15,state1,state2
 	MixColumn 4,4,9,14,3,state1,state2
@@ -68,7 +170,13 @@
 	eor	Xtime3Sbox,X
 	ldy	&state+&D
 	eor	Xtime2Sbox,Y
+	aif	(rk+&round*16+&i+3)>255,.bigindex
 	eor	rk+&round*16+&i+3
+	ago	.cont
+.bigindex
+	ldx	#&round*16+&i+3
+	eor	rk,X
+.cont
 	sta	&out+&i+3
 	aif	&i<>12,.skip2
 	tay
@@ -109,7 +217,13 @@
 	ldy	state2+&from
 .skip
 	lda	Sbox,Y
+	aif	(rk+&round*16+&to)>255,.bigindex
 	eor	rk+&round*16+&to
+	ago	.cont
+.bigindex
+	ldx	#&round*16+&to
+	eor	rk,X
+.cont
 	sta	state1+&to
 
 	mend
