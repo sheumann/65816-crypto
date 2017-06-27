@@ -1,0 +1,132 @@
+	macro
+	AddInitialRoundKey
+	lcla	&i
+.top
+	lda	state1+&i
+	eor	rk+&i
+	sta	state1+&i
+&i	seta	&i+2
+	aif	&i<16,.top
+	mend
+
+
+	macro
+	NormalRound &round
+
+	aif	&round/2*2=&round,.evenround
+	MixColumn 0,0,5,10,15,state1,state2
+	MixColumn 4,4,9,14,3,state1,state2
+	MixColumn 8,8,13,2,7,state1,state2
+	MixColumn 12,12,1,6,11,state1,state2
+	ago	.done
+.evenround
+	MixColumn 0,0,5,10,15,state2,state1
+	MixColumn 4,4,9,14,3,state2,state1
+	MixColumn 8,8,13,2,7,state2,state1
+	MixColumn 12,12,1,6,11,state2,state1	
+.done
+	mend
+
+
+	macro
+	MixColumn &i,&A,&B,&C,&D,&state,&out
+	
+	ldy	&state+&A
+	lda	Xtime2Sbox,Y
+	ldy	&state+&B
+	eor	Xtime3Sbox,Y
+	ldy	&state+&C
+	eor	Sbox,Y
+	ldy	&state+&D
+	eor	Sbox,Y
+	eor	rk+&round*16+&i
+	sta	&out+&i
+	
+	ldy	&state+&A
+	lda	Sbox,Y
+	ldy	&state+&B
+	eor	Xtime2Sbox,Y
+	ldy	&state+&C
+	eor	Xtime3Sbox,Y
+	ldy	&state+&D
+	eor	Sbox,Y
+	eor	rk+&round*16+&i+1
+	sta	&out+&i+1
+	
+	ldy	&state+&A
+	lda	Sbox,Y
+	ldy	&state+&B
+	eor	Sbox,Y
+	ldy	&state+&C
+	eor	Xtime2Sbox,Y
+	ldy	&state+&D
+	eor	Xtime3Sbox,Y
+	eor	rk+&round*16+&i+2
+	sta	&out+&i+2
+	
+	ldy	&state+&A
+	lda	Xtime3Sbox,Y
+	ldy	&state+&B
+	eor	Sbox,Y
+	ldy	&state+&C
+	eor	Sbox,Y
+	ldy	&state+&D
+	eor	Xtime2Sbox,Y
+	eor	rk+&round*16+&i+3
+	sta	&out+&i+3
+	
+	mend
+
+
+	macro
+	FinalRound &round
+	
+	FinalRoundStep 0,0
+	FinalRoundStep 4,4
+	FinalRoundStep 8,8
+	FinalRoundStep 12,12
+	
+	FinalRoundStep 13,1
+	FinalRoundStep 1,5
+	FinalRoundStep 5,9
+	FinalRoundStep 9,13
+	
+	FinalRoundStep 10,2
+	FinalRoundStep 2,10
+	FinalRoundStep 14,6
+	FinalRoundStep 6,14
+	
+	FinalRoundStep 3,15
+	FinalRoundStep 15,11
+	FinalRoundStep 11,7
+	FinalRoundStep 7,3
+	
+	mend
+
+
+	macro
+	FinalRoundStep &to,&from
+
+	ldy	state2+&from
+	lda	Sbox,Y
+	eor	rk+&round*16+&to
+	sta	state1+&to
+
+	mend
+
+
+	macro
+	ShortRegs
+	sep	#$30
+	longa	off
+	longi	off
+	mend
+
+
+	macro
+	LongRegs
+	rep	#$30
+	longa	on
+	longi	on
+	mend
+
