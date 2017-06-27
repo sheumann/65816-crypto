@@ -31,7 +31,9 @@
 	macro
 	MixColumn &i,&A,&B,&C,&D,&state,&out
 
+	aif	(&i=0).AND.(&round<>1),.skip
 	ldy	&state+&D
+.skip
 	lda	Sbox,Y
 	pha
 	ldx	&state+&A
@@ -68,40 +70,44 @@
 	eor	Xtime2Sbox,Y
 	eor	rk+&round*16+&i+3
 	sta	&out+&i+3
-	
+	aif	&i<>12,.skip2
+	tay
+.skip2
 	mend
 
 
 	macro
 	FinalRound &round
-	
+
+	FinalRoundStep 3,15,1
+	FinalRoundStep 15,11
+	FinalRoundStep 11,7
+	FinalRoundStep 7,3
+
 	FinalRoundStep 0,0
 	FinalRoundStep 4,4
 	FinalRoundStep 8,8
 	FinalRoundStep 12,12
-	
+
 	FinalRoundStep 13,1
 	FinalRoundStep 1,5
 	FinalRoundStep 5,9
 	FinalRoundStep 9,13
-	
+
 	FinalRoundStep 10,2
 	FinalRoundStep 2,10
 	FinalRoundStep 14,6
 	FinalRoundStep 6,14
 	
-	FinalRoundStep 3,15
-	FinalRoundStep 15,11
-	FinalRoundStep 11,7
-	FinalRoundStep 7,3
-	
 	mend
 
 
 	macro
-	FinalRoundStep &to,&from
+	FinalRoundStep &to,&from,&skipldy
 
+	aif	C:&skipldy,.skip
 	ldy	state2+&from
+.skip
 	lda	Sbox,Y
 	eor	rk+&round*16+&to
 	sta	state1+&to
