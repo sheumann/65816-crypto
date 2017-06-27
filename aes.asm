@@ -335,3 +335,36 @@ finish_aes128 anop
 	LongRegs
 	rtl
 	end
+
+
+aes128_decrypt start
+	CFunction AES128_DECRYPT
+	end
+
+aes192_decrypt start
+	CFunction AES192_DECRYPT
+	end
+
+AES192_DECRYPT start
+	using	tables
+	
+	InvFinalRound 12
+	InvNormalRound 11
+	InvNormalRound 10
+	jmp	cont
+	
+AES128_DECRYPT entry
+	InvFinalRound 10
+cont	anop
+	InvNormalRound 9
+	InvNormalRound 8
+	InvNormalRound 7
+	InvNormalRound 6
+	InvNormalRound 5
+	InvNormalRound 4
+	InvNormalRound 3
+	InvNormalRound 2
+	InvNormalRound 1
+	InvNormalRound 0
+	rtl
+	end

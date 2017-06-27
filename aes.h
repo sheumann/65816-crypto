@@ -11,3 +11,6 @@ void aes_expandkey192(struct aes_state *state);
 void aes_expandkey256(struct aes_state *state);
 
 void aes_encrypt(struct aes_state *state);
+
+void aes128_decrypt(struct aes_state *state);
+void aes192_decrypt(struct aes_state *state);

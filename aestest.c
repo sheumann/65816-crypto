@@ -38,6 +38,10 @@ void aes128_test(void) {
     aes_encrypt(&aes_state);
     
     print_hexbytes("Output:       ", aes_state.data, 16);
+    
+    aes128_decrypt(&aes_state);
+    
+    print_hexbytes("Decrypted:    ", aes_state.data, 16);   
 }
 
 void aes192_test(void) {
@@ -64,6 +68,10 @@ void aes192_test(void) {
     aes_encrypt(&aes_state);
     
     print_hexbytes("Output:       ", aes_state.data, 16);
+    
+    aes192_decrypt(&aes_state);
+    
+    print_hexbytes("Decrypted:    ", aes_state.data, 16);   
 }
 
 void aes256_test(void) {

@@ -230,6 +230,132 @@
 
 
 	macro
+	InvNormalRound &round,&state
+	lcla	&i
+	lclc	&state
+	lclc	&out
+
+	aif	&round/2*2=&round,.evenround
+&state	setc	state2
+&out	setc	state1
+	ago	.cont
+.evenround
+&state	setc	state1
+&out	setc	state2
+.cont
+	
+.loop
+	lda	&state+&i
+	eor	rk+&round*16+&i
+	sta	&state+&i
+&i	seta	&i+2
+	aif	&i<16,.loop
+
+	aif	&round=0,.skip
+	ShortRegs
+	InvMixColumn 0,5,10,15,0
+	InvMixColumn 4,9,14,3,4
+	InvMixColumn 8,13,2,7,8
+	InvMixColumn 12,1,6,11,12
+	LongRegs
+.skip
+	mend
+
+
+	macro
+	InvMixColumn &A,&B,&C,&D,&i
+	
+	ldy	&state+&i+0
+	lda	XtimeE,Y
+	ldy	&state+&i+1
+	eor	XtimeB,Y
+	ldy	&state+&i+2
+	eor	XtimeD,Y
+	ldy	&state+&i+3
+	eor	Xtime9,Y
+	tay
+	lda	InvSbox,Y
+	sta	&out+&A
+	
+	ldy	&state+&i+0
+	lda	Xtime9,Y
+	ldy	&state+&i+1
+	eor	XtimeE,Y
+	ldy	&state+&i+2
+	eor	XtimeB,Y
+	ldy	&state+&i+3
+	eor	XtimeD,Y
+	tay
+	lda	InvSbox,Y
+	sta	&out+&B
+	
+	ldy	&state+&i+0
+	lda	XtimeD,Y
+	ldy	&state+&i+1
+	eor	Xtime9,Y
+	ldy	&state+&i+2
+	eor	XtimeE,Y
+	ldy	&state+&i+3
+	eor	XtimeB,Y
+	tay
+	lda	InvSbox,Y
+	sta	&out+&C
+	
+	ldy	&state+&i+0
+	lda	XtimeB,Y
+	ldy	&state+&i+1
+	eor	XtimeD,Y
+	ldy	&state+&i+2
+	eor	Xtime9,Y
+	ldy	&state+&i+3
+	eor	XtimeE,Y
+	tay
+	lda	InvSbox,Y
+	sta	&out+&D
+	mend
+
+
+	macro
+	InvFinalRoundStep &to,&from
+	
+	lda	state1+&from
+	eor	rk+&round*16+&from
+	tay
+	lda	InvSbox,Y
+	sta	state2+&to
+
+	mend
+
+
+	macro
+	InvFinalRound &round
+	
+	ShortRegs
+	InvFinalRoundStep 0,0
+	InvFinalRoundStep 4,4
+	InvFinalRoundStep 8,8
+	InvFinalRoundStep 12,12
+	
+	InvFinalRoundStep 1,13
+	InvFinalRoundStep 13,9
+	InvFinalRoundStep 9,5
+	InvFinalRoundStep 5,1
+	
+	InvFinalRoundStep 10,2
+	InvFinalRoundStep 2,10
+	InvFinalRoundStep 14,6
+	InvFinalRoundStep 6,14
+	
+	InvFinalRoundStep 15,3
+	InvFinalRoundStep 3,7
+	InvFinalRoundStep 7,11
+	InvFinalRoundStep 11,15
+	LongRegs
+	
+	mend
+	
+
+	macro
 	ShortRegs
 	sep	#$30
 	longa	off
