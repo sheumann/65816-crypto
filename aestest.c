@@ -148,7 +148,12 @@ unsigned long aes128_time_test(unsigned int iters) {
     print_hexbytes("Decrypted:    ", aes_context->data, 16);
 }
 
-int main(void) {
+int main(int argc, char **argv) {
+    unsigned int test_iters = 0;
+    
+    if (argc > 1)
+	test_iters = strtoul(argv[1], NULL, 10);
+
     printf("AES-128 test:\n");
     aes128_test();
     
@@ -158,5 +163,6 @@ int main(void) {
     printf("AES-256 test:\n");
     aes256_test();
     
-    aes128_time_test(1000);
+    if (test_iters)
+        aes128_time_test(test_iters);
 }
