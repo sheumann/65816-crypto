@@ -15,6 +15,8 @@
  */
 
 #include <stdio.h>
+#include <stdlib.h>
+#include <errno.h>
 #include <MiscTool.h>
 #include <Memory.h>
 #include <orca.h>
@@ -133,9 +135,9 @@ unsigned long aes128_time_test(unsigned int iters) {
     };
     
     aes_context_hndl = (struct aes_context **)NewHandle(sizeof(struct aes_context),
-    		userid(), attrFixed|attrPage|attrBank|attrNoCross, 0x000000);
+                userid(), attrFixed|attrPage|attrBank|attrNoCross, 0x000000);
     if (toolerror())
-	return 0;
+        return 0;
     aes_context = *aes_context_hndl;
     *aes_context = aes_context_init;
 
@@ -149,7 +151,7 @@ unsigned long aes128_time_test(unsigned int iters) {
     
     bytes_per_sec = (long double)iters * 16 * 60 / tick_count;
     printf("Encryption: %u iterations takes %lu ticks (%lf bytes/sec)\n",
-    	   iters, tick_count, bytes_per_sec);    
+           iters, tick_count, bytes_per_sec);    
 
     tick_count = GetTick();
     for (i = 0; i < iters; i++) {
@@ -159,16 +161,22 @@ unsigned long aes128_time_test(unsigned int iters) {
     
     bytes_per_sec = (long double)iters * 16 * 60 / tick_count;
     printf("Decryption: %u iterations takes %lu ticks (%lf bytes/sec)\n",
-    	   iters, tick_count, bytes_per_sec);
-	   
+           iters, tick_count, bytes_per_sec);
+           
     print_hexbytes("Decrypted:    ", aes_context->data, 16);
 }
 
 int main(int argc, char **argv) {
     unsigned int test_iters = 0;
     
-    if (argc > 1)
-	test_iters = strtoul(argv[1], NULL, 10);
+    if (argc > 1) {
+        errno = 0;
+        test_iters = strtoul(argv[1], NULL, 10);
+        if (argc > 2 || errno != 0) {
+            fprintf(stderr, "Usage: aestest [test_iters]\n");
+            exit(1);
+        }
+    }
 
     printf("AES-128 test:\n");
     aes128_test();
