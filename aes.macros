@@ -259,10 +259,10 @@
 
 	aif	&round=0,.skip
 	ShortRegs
+	InvMixColumn 12,1,6,11,12
 	InvMixColumn 0,5,10,15,0
 	InvMixColumn 4,9,14,3,4
 	InvMixColumn 8,13,2,7,8
-	InvMixColumn 12,1,6,11,12
 	LongRegs
 .skip
 	mend
@@ -270,13 +270,29 @@
 
 	macro
 	InvMixColumn &A,&B,&C,&D,&i
+
+	aif	(&i+2)=14,.dotax
+	ldx	&state+&i+2
+	ago	.cont
+.dotax
+	tax			;value left from AddRoundKey step
+.cont
+	lda	Xtime9,X
+	ldy	&state+&i+0
+	eor	XtimeB,Y
+	ldy	&state+&i+1
+	eor	XtimeD,Y
+	ldy	&state+&i+3
+	eor	XtimeE,Y
+	tay
+	lda	InvSbox,Y
+	sta	&out+&D
 	
 	ldy	&state+&i+0
 	lda	XtimeE,Y
 	ldy	&state+&i+1
 	eor	XtimeB,Y
-	ldy	&state+&i+2
-	eor	XtimeD,Y
+	eor	XtimeD,X
 	ldy	&state+&i+3
 	eor	Xtime9,Y
 	tay
@@ -287,8 +303,7 @@
 	lda	Xtime9,Y
 	ldy	&state+&i+1
 	eor	XtimeE,Y
-	ldy	&state+&i+2
-	eor	XtimeB,Y
+	eor	XtimeB,X
 	ldy	&state+&i+3
 	eor	XtimeD,Y
 	tay
@@ -299,25 +314,12 @@
 	lda	XtimeD,Y
 	ldy	&state+&i+1
 	eor	Xtime9,Y
-	ldy	&state+&i+2
-	eor	XtimeE,Y
+	eor	XtimeE,X
 	ldy	&state+&i+3
 	eor	XtimeB,Y
 	tay
 	lda	InvSbox,Y
 	sta	&out+&C
-	
-	ldy	&state+&i+0
-	lda	XtimeB,Y
-	ldy	&state+&i+1
-	eor	XtimeD,Y
-	ldy	&state+&i+2
-	eor	Xtime9,Y
-	ldy	&state+&i+3
-	eor	XtimeE,Y
-	tay
-	lda	InvSbox,Y
-	sta	&out+&D
 	mend
 
 
