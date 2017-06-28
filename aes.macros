@@ -1,3 +1,17 @@
+* Copyright (c) 2017 Stephen Heumann
+*
+* Permission to use, copy, modify, and distribute this software for any
+* purpose with or without fee is hereby granted, provided that the above
+* copyright notice and this permission notice appear in all copies.
+*
+* THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+* WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+* MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+* ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+* WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+* ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+* OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+
 * This makes a function wrapper that is callable from C,
 * taking a pointer to the state structure as its argument.
 	macro
@@ -18,7 +32,7 @@
 	rtl
 	mend
 
-
+*The 'core' function applied to some words when computing the AES key schedule
 	macro
 	ExpandKeyCore &xorback,&rconoffset
 
@@ -79,7 +93,7 @@
 
 	mend
 
-
+* Generate consecutive words of key schedule that don't use above functions
 	macro
 	ExpandKeyIter &xorback,&nwords
 	lcla	&i
@@ -99,7 +113,7 @@
 	aif	&i/4<&nwords,.loop2
 	mend
 
-
+* Do an initial AddRoundKey step on the starting state (for encryption)
 	macro
 	AddInitialRoundKey
 	lcla	&i
@@ -111,7 +125,7 @@
 	aif	&i<16,.top
 	mend
 
-
+* Do a full normal round, including (in effect) SubBytes through AddRoundKey
 	macro
 &lbl	NormalRound &round
 &lbl	anop
@@ -129,7 +143,7 @@
 .done
 	mend
 
-
+* Do the operations on one column for a normal round.
 	macro
 	MixColumn &i,&A,&B,&C,&D,&state,&out
 
@@ -183,7 +197,7 @@
 .skip2
 	mend
 
-
+* Do final round, including (in effect) SubBytes, ShiftRows, and AddRoundKey.
 	macro
 	FinalRound &round
 
@@ -209,7 +223,7 @@
 	
 	mend
 
-
+* Do the final round operations for one byte.
 	macro
 	FinalRoundStep &to,&from,&skipldy
 
@@ -228,7 +242,7 @@
 
 	mend
 
-
+* Perform an inverse normal round (for decryption)
 	macro
 	InvNormalRound &round,&state
 	lcla	&i
@@ -250,7 +264,7 @@
 	InvMixColumn 4,9,14,3,4,dotax=1
 	mend
 
-
+* Perform the operations for one column in an inverse normal round
 	macro
 	InvMixColumn &A,&B,&C,&D,&i,&skipldx,&dotax
 
@@ -311,7 +325,7 @@
 .done
 	mend
 
-
+* Do the inverse final round steps for one byte.
 	macro
 	InvFinalRoundStep &to,&from,&dotax
 	
@@ -341,7 +355,7 @@
 .done
 	mend
 
-
+* Do the inverse of the final round (which comes first for decryption).
 	macro
 	InvFinalRound &round
 	
@@ -367,7 +381,7 @@
 	
 	mend
 	
-
+* Set registers to 8 bits
 	macro
 	ShortRegs
 	sep	#$30
@@ -375,11 +389,10 @@
 	longi	off
 	mend
 
-
+* Set registers to 16 bits
 	macro
 	LongRegs
 	rep	#$30
 	longa	on
 	longi	on
 	mend
-

@@ -1,6 +1,33 @@
+* Copyright (c) 2017 Stephen Heumann
+*
+* Permission to use, copy, modify, and distribute this software for any
+* purpose with or without fee is hereby granted, provided that the above
+* copyright notice and this permission notice appear in all copies.
+*
+* THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+* WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+* MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+* ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+* WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+* ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+* OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+
+
+* AES encryption and decryption functions for the 65816
+*
+* The general approach is largely based on the public domain
+* 'aestable.c' implementation by Karl Malbrain, available at:
+* https://code.google.com/archive/p/byte-oriented-aes/downloads
+* Portions are also based on the public domain 'rijndael-alg-fst.c'
+* reference implementation by Vincent Rijmen, Antoon Bosselaers,
+* and Paulo Barreto.
+
+
 	case	on
 	mcopy	aes.macros
 
+* Data tables used for AES encryption and decryption.
+* For best performance, these should be page-aligned.
 	align	256
 tables	privdata
 Sbox	anop		; forward s-box
@@ -181,6 +208,7 @@ Rcon	anop
 	dc h'ab 1b 40'
 	end
 
+* Direct page locations
 state1	gequ	0
 state2	gequ	16
 keysize	gequ	32
@@ -192,7 +220,11 @@ keysize_192 gequ 64
 keysize_256 gequ 128
 
 
-* Callable from C, with state structure pointer on stack.
+* AES key expansion functions
+* The appropriate one of these must be called before encrypting or decrypting.
+* The key should be in the first 16/24/32 bytes of rk before calling this.
+
+* Callable from C, with context structure pointer on stack.
 aes128_expandkey start
 	CFunction AES128_EXPANDKEY
 	end
@@ -205,7 +237,7 @@ aes256_expandkey start
 	CFunction AES256_EXPANDKEY
 	end
 
-* Call with DP = AES state structure (with key expanded),
+* Call with DP = AES context structure (with key present but not expanded),
 *           DB = bank containing AES tables.
 AES128_EXPANDKEY start
 	using	tables
@@ -281,13 +313,17 @@ done	rtl
 	end
 
 
-* Callable from C, with state structure pointer on stack.
+* AES encryption function
+* This performs AES-128, AES-192, or AES-256 encryption, depending on the key.
+* The unencrypted input and encrypted output are in state1.
+
+* Callable from C, with context structure pointer on stack.
 aes_encrypt start
 	CFunction AES_ENCRYPT
 	end
 
 
-* Call with DP = AES state structure (with key expanded),
+* Call with DP = AES context structure (with key expanded),
 *           DP = bank containing AES tables.
 AES_ENCRYPT start
 	using	tables
@@ -337,6 +373,10 @@ finish_aes128 anop
 	end
 
 
+* AES decryption functions
+* The encrypted input and unencrypted output are in state1.
+
+* Callable from C, with context structure pointer on stack.
 aes128_decrypt start
 	CFunction AES128_DECRYPT
 	end
@@ -349,6 +389,8 @@ aes256_decrypt start
 	CFunction AES256_DECRYPT
 	end
 
+* Call with DP = AES context structure (with key expanded),
+*           DP = bank containing AES tables.
 AES256_DECRYPT start
 	using	tables
 	ShortRegs
