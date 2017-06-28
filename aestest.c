@@ -107,6 +107,8 @@ void aes256_test(void) {
 unsigned long aes128_time_test(unsigned int iters) {
     unsigned int i;
     unsigned long tick_count;
+    long double bytes_per_sec;
+
     struct aes_state *aes_state, **aes_state_hndl;
     static struct aes_state aes_state_init = {
         {0x00,0x11,0x22,0x33,0x44,0x55,0x66,0x77,0x88,0x99,0xaa,0xbb,0xcc,0xdd,0xee,0xff},
@@ -127,14 +129,26 @@ unsigned long aes128_time_test(unsigned int iters) {
     for (i = 0; i < iters; i++) {
         aes_encrypt(aes_state);
     }
-    return GetTick() - tick_count;
+    tick_count = GetTick() - tick_count;
+    
+    bytes_per_sec = (long double)iters * 16 * 60 / tick_count;
+    printf("Encryption: %u iterations takes %lu ticks (%lf bytes/sec)\n",
+    	   iters, tick_count, bytes_per_sec);    
+
+    tick_count = GetTick();
+    for (i = 0; i < iters; i++) {
+        aes128_decrypt(aes_state);
+    }
+    tick_count = GetTick() - tick_count;
+    
+    bytes_per_sec = (long double)iters * 16 * 60 / tick_count;
+    printf("Decryption: %u iterations takes %lu ticks (%lf bytes/sec)\n",
+    	   iters, tick_count, bytes_per_sec);
+	   
+    print_hexbytes("Decrypted:    ", aes_state->data, 16);
 }
 
 int main(void) {
-    unsigned long tick_count;
-    unsigned int test_iters = 1000;
-    long double bytes_per_sec;
-
     printf("AES-128 test:\n");
     aes128_test();
     
@@ -144,9 +158,5 @@ int main(void) {
     printf("AES-256 test:\n");
     aes256_test();
     
-    tick_count = aes128_time_test(test_iters);
-    printf("%u iterations takes %lu ticks", test_iters, tick_count);
-    fflush(stdout);
-    bytes_per_sec = (long double)test_iters * 16 * 60 / tick_count;
-    printf(" (%lf bytes/sec)\n", bytes_per_sec);
+    aes128_time_test(1000);
 }
