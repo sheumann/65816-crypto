@@ -193,21 +193,21 @@ keysize_256 gequ 128
 
 
 * Callable from C, with state structure pointer on stack.
-aes_expandkey128 start
-	CFunction ExpandKey128
+aes128_expandkey start
+	CFunction AES128_EXPANDKEY
 	end
 
-aes_expandkey192 start
-	CFunction ExpandKey192
+aes192_expandkey start
+	CFunction AES192_EXPANDKEY
 	end
 
-aes_expandkey256 start
-	CFunction ExpandKey256
+aes256_expandkey start
+	CFunction AES256_EXPANDKEY
 	end
 
 * Call with DP = AES state structure (with key expanded),
 *           DB = bank containing AES tables.
-ExpandKey128 start
+AES128_EXPANDKEY start
 	using	tables
 
 	stz	keysize-1		;keysize_128
@@ -228,7 +228,7 @@ top	anop
 	end
 
 
-ExpandKey192 start
+AES192_EXPANDKEY start
 	using	tables
 
 	lda	#keysize_192|8
@@ -250,7 +250,7 @@ top	anop
 	end
 
 
-ExpandKey256 start
+AES256_EXPANDKEY start
 	using	tables
 	
 	lda	#keysize_256|8
