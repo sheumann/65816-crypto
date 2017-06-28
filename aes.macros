@@ -243,40 +243,18 @@
 &state	setc	state1
 &out	setc	state2
 .cont
-	
-.loop
-	lda	&state+&i
-	aif	(rk+&round*16+&i)>255,.bigindex
-	eor	rk+&round*16+&i
-	ago	.cont
-.bigindex
-	ldx	#&round*16+&i
-	eor	rk,X
-.cont
-	sta	&state+&i
-&i	seta	&i+2
-	aif	&i<16,.loop
 
-	aif	&round=0,.skip
-	ShortRegs
 	InvMixColumn 12,1,6,11,12
 	InvMixColumn 0,5,10,15,0
 	InvMixColumn 4,9,14,3,4
 	InvMixColumn 8,13,2,7,8
-	LongRegs
-.skip
 	mend
 
 
 	macro
 	InvMixColumn &A,&B,&C,&D,&i
 
-	aif	(&i+2)=14,.dotax
 	ldx	&state+&i+2
-	ago	.cont
-.dotax
-	tax			;value left from AddRoundKey step
-.cont
 	lda	Xtime9,X
 	ldy	&state+&i+0
 	eor	XtimeB,Y
@@ -286,6 +264,7 @@
 	eor	XtimeE,Y
 	tay
 	lda	InvSbox,Y
+	eor	rk+(&round-1)*16+&D
 	sta	&out+&D
 	
 	ldy	&state+&i+0
@@ -297,6 +276,7 @@
 	eor	Xtime9,Y
 	tay
 	lda	InvSbox,Y
+	eor	rk+(&round-1)*16+&A
 	sta	&out+&A
 	
 	ldy	&state+&i+0
@@ -308,6 +288,7 @@
 	eor	XtimeD,Y
 	tay
 	lda	InvSbox,Y
+	eor	rk+(&round-1)*16+&B
 	sta	&out+&B
 	
 	ldy	&state+&i+0
@@ -319,6 +300,7 @@
 	eor	XtimeB,Y
 	tay
 	lda	InvSbox,Y
+	eor	rk+(&round-1)*16+&C
 	sta	&out+&C
 	mend
 
@@ -336,6 +318,14 @@
 .cont
 	tay
 	lda	InvSbox,Y
+
+	aif	(rk+(&round-1)*16+&to)>255,.bigindex2
+	eor	rk+(&round-1)*16+&to
+	ago	.cont2
+.bigindex2
+	ldx	#(&round-1)*16+&to
+	eor	rk,X
+.cont2
 	sta	state2+&to
 
 	mend
@@ -344,7 +334,6 @@
 	macro
 	InvFinalRound &round
 	
-	ShortRegs
 	InvFinalRoundStep 0,0
 	InvFinalRoundStep 4,4
 	InvFinalRoundStep 8,8
@@ -364,7 +353,6 @@
 	InvFinalRoundStep 3,7
 	InvFinalRoundStep 7,11
 	InvFinalRoundStep 11,15
-	LongRegs
 	
 	mend
 	

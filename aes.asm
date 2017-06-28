@@ -351,12 +351,14 @@ aes256_decrypt start
 
 AES256_DECRYPT start
 	using	tables
+	ShortRegs
 	InvFinalRound 14
 	InvNormalRound 13
 	InvNormalRound 12
 	jmp	cont1
 
 AES192_DECRYPT entry
+	ShortRegs
 	InvFinalRound 12
 cont1	anop
 	InvNormalRound 11
@@ -364,6 +366,7 @@ cont1	anop
 	jmp	cont2
 	
 AES128_DECRYPT entry
+	ShortRegs
 	InvFinalRound 10
 cont2	anop
 	InvNormalRound 9
@@ -375,6 +378,6 @@ cont2	anop
 	InvNormalRound 3
 	InvNormalRound 2
 	InvNormalRound 1
-	InvNormalRound 0
+	LongRegs
 	rtl
 	end
