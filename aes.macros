@@ -244,17 +244,19 @@
 &out	setc	state2
 .cont
 
-	InvMixColumn 12,1,6,11,12
+	InvMixColumn 12,1,6,11,12,1
 	InvMixColumn 0,5,10,15,0
-	InvMixColumn 4,9,14,3,4
 	InvMixColumn 8,13,2,7,8
+	InvMixColumn 4,9,14,3,4,dotax=1
 	mend
 
 
 	macro
-	InvMixColumn &A,&B,&C,&D,&i
+	InvMixColumn &A,&B,&C,&D,&i,&skipldx,&dotax
 
+	aif	C:&skipldx,.skip
 	ldx	&state+&i+2
+.skip
 	lda	Xtime9,X
 	ldy	&state+&i+0
 	eor	XtimeB,Y
@@ -301,12 +303,17 @@
 	tay
 	lda	InvSbox,Y
 	eor	rk+(&round-1)*16+&C
+	aif	(C:&dotax).AND.(&round<>1),.dotax
 	sta	&out+&C
+	ago	.done
+.dotax
+	tax
+.done
 	mend
 
 
 	macro
-	InvFinalRoundStep &to,&from
+	InvFinalRoundStep &to,&from,&dotax
 	
 	lda	state1+&from
 	aif	(rk+&round*16+&from)>255,.bigindex
@@ -326,8 +333,12 @@
 	ldx	#(&round-1)*16+&to
 	eor	rk,X
 .cont2
+	aif	C:&dotax,.dotax
 	sta	state2+&to
-
+	ago	.done
+.dotax
+	tax
+.done
 	mend
 
 
@@ -344,15 +355,15 @@
 	InvFinalRoundStep 9,5
 	InvFinalRoundStep 5,1
 	
-	InvFinalRoundStep 10,2
-	InvFinalRoundStep 2,10
-	InvFinalRoundStep 14,6
-	InvFinalRoundStep 6,14
-	
 	InvFinalRoundStep 15,3
 	InvFinalRoundStep 3,7
 	InvFinalRoundStep 7,11
 	InvFinalRoundStep 11,15
+
+	InvFinalRoundStep 2,10
+	InvFinalRoundStep 10,2
+	InvFinalRoundStep 6,14
+	InvFinalRoundStep 14,6,1
 	
 	mend
 	
