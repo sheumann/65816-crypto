@@ -21,7 +21,11 @@ struct aes_context {
 	unsigned char reserved2[16*13];
 };
 
-/* The context structure must be in bank 0, preferably page-aligned. */
+/*
+ * The context structure must be in bank 0, preferably page-aligned.
+ * Note that a 256-byte (one page) context structure is sufficient for
+ * AES-128 and AES-192. The full length is needed only for AES-256.
+ */
 
 /*
  * AES key expansion functions
