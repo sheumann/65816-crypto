@@ -1,0 +1,132 @@
+* This makes a function wrapper that is callable from C,
+* taking a pointer to the context structure as its argument.
+	macro
+	CFunction &fn
+	phb
+	plx
+	ply
+	tdc
+	pld
+	plb
+	plb
+	phy
+	phx
+	plb
+	pha
+	jsl	&fn
+	pld
+	rtl
+	mend
+
+
+* Macros to operate on elements of the message schedule (W)
+	macro
+&lab	lda_w	&i,&inc
+	aif	C:&inc<>0,.haveinc
+	lcla	&inc
+.haveinc
+	aif	w+(&i)*4+&inc>255,.bigidx
+&lab	lda	w+(&i)*4+&inc
+	ago	.end
+.bigidx
+&lab	ldx	#((&i)-16)*4+&inc
+	lda	w+16*4,x
+.end
+	mend
+
+	macro
+&lab	eor_w	&i,&inc
+	aif	C:&inc<>0,.haveinc
+	lcla	&inc
+.haveinc
+	aif	w+(&i)*4+&inc>255,.bigidx
+&lab	eor	w+(&i)*4+&inc
+	ago	.end
+.bigidx
+&lab	ldx	#((&i)-16)*4+&inc
+	eor	w+16*4,x
+.end
+	mend
+
+	macro
+&lab	sta_w	&i,&inc
+	aif	C:&inc<>0,.haveinc
+	lcla	&inc
+.haveinc
+	aif	w+(&i)*4+&inc>255,.bigidx
+&lab	sta	w+(&i)*4+&inc
+	ago	.end
+.bigidx
+&lab	ldx	#((&i)-16)*4+&inc
+	sta	w+16*4,x
+.end
+	mend
+
+	macro
+&lab	inc_w	&i,&inc
+	aif	C:&inc<>0,.haveinc
+	lcla	&inc
+.haveinc
+	aif	w+(&i)*4+&inc>255,.bigidx
+&lab	inc	w+(&i)*4+&inc
+	ago	.end
+.bigidx
+&lab	ldx	#((&i)-16)*4+&inc
+	inc	w+16*4,x
+.end
+	mend
+
+	macro
+&lab	rol_w	&i,&inc
+	aif	C:&inc<>0,.haveinc
+	lcla	&inc
+.haveinc
+	aif	w+(&i)*4+&inc>255,.bigidx
+&lab	rol	w+(&i)*4+&inc
+	ago	.end
+.bigidx
+&lab	ldx	#((&i)-16)*4+&inc
+	rol	w+16*4,x
+.end
+	mend
+
+
+* Compute the message schedule (W_0 to W_79) 
+	macro
+	ComputeSchedule
+	lcla	&i
+
+; Flip the endianness of W_0 to W_15 (the current chunk of the message)
+.loop1
+	lda	w+&i*4
+	xba
+	ldx	w+&i*4+2
+	sta	w+&i*4+2
+	txa
+	xba
+	sta	w+&i*4
+&i	seta	&i+1
+	aif	&i<16,.loop1
+
+; compute the rest of the message schedule (W_16 to W_79)
+.loop2
+	lda_w	&i-3
+	eor_w	&i-8
+	eor_w	&i-14
+	eor_w	&i-16
+	sta_w	&i
+	asl	a		; to set carry
+
+	lda_w	&i-3,2
+	eor_w	&i-8,2
+	eor_w	&i-14,2
+	eor_w	&i-16,2
+	rol	a
+	sta_w	&i,2
+
+	rol_w	&i
+	
+&i	seta	&i+1
+	aif	&i<80,.loop2
+	mend
+
