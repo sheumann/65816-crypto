@@ -13,7 +13,7 @@
 * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 * This makes a function wrapper that is callable from C,
-* taking a pointer to the state structure as its argument.
+* taking a pointer to the context structure as its argument.
 	macro
 	CFunction &fn
 	phb
