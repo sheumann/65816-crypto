@@ -1,6 +1,5 @@
 	case	on
 	mcopy	sha1.macros
-	mcopy	rotate.macros
 
 * Direct page locations	
 ;chunk	gequ	0	; 8 bytes
@@ -92,137 +91,10 @@ SHA1_PROCESSCHUNK start
 	sta	e+2
 
 	ldx	#0
-loop	anop
-	ROTL4MOVE temp,a_,5
-	stx	idx
-	cpx	#60*4
-	bge	f_60
-	cpx	#40*4
-	bge	f_40
-	cpx	#20*4
-	bge	f_20
-
-* f_0 to f_19
-f_0	lda	c
-	eor	d
-	and	b
-	eor	d
-	clc
-	adc	#$7999
-	sta	f_plus_k
-	
-	lda	c+2
-	eor	d+2
-	and	b+2
-	eor	d+2
-	adc	#$5A82
-	sta	f_plus_k+2
-	bra	after_f
-
-* f_20 to f_39
-f_20	lda	b
-	eor	c
-	eor	d
-	clc
-	adc	#$EBA1
-	sta	f_plus_k
-	
-	lda	b+2
-	eor	c+2
-	eor	d+2
-	adc	#$6ED9
-	sta	f_plus_k+2
-	bra	after_f
-
-* f_40 to f_59
-f_40	lda	c
-	ora	d
-	and	b
-	sta	f40temp
-	lda	c
-	and	d
-	ora	f40temp
-	clc
-	adc	#$BCDC
-	sta	f_plus_k
-	
-	lda	c+2
-	ora	d+2
-	and	b+2
-	sta	f40temp
-	lda	c+2
-	and	d+2
-	ora	f40temp
-	adc	#$8F1B
-	sta	f_plus_k+2
-	bra	after_f
-
-* f_60 to f_79
-f_60	lda	b
-	eor	c
-	eor	d
-	clc
-	adc	#$C1D6
-	sta	f_plus_k
-	
-	lda	b+2
-	eor	c+2
-	eor	d+2
-	adc	#$CA62
-	sta	f_plus_k+2
-
-after_f	anop
-	ldx	idx
-	clc
-	lda	w,x
-	adc	temp
-	tay
-	lda	w+2,x
-	adc	temp+2
-	tax
-	clc
-	tya
-	adc	e
-	tay
-	txa
-	adc	e+2
-	tax
-	clc
-	tya
-	adc	f_plus_k
-	tay
-	txa
-	adc	f_plus_k+2
-	tax
-
-	lda	d
-	sta	e
-	lda	d+2
-	sta	e+2
-
-	lda	c
-	sta	d
-	lda	c+2
-	sta	d+2
-
-	ROTL4MOVE c,b,30
-	
-	lda	a_
-	sta	b
-	lda	a_+2
-	sta	b+2
-	
-	sty	a_
-	stx	a_+2
-
-	ldx	idx
-	inx
-	inx
-	inx
-	inx
-	cpx	#80*4
-	bge	endloop
-	jmp	loop
+	BlockLoopPart 1
+	BlockLoopPart 2
+	BlockLoopPart 3
+	BlockLoopPart 4
 
 endloop clc
 	lda	h0

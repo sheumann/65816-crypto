@@ -1,3 +1,86 @@
+* Right-rotate 32-bit value in &loc (DP or 16-bit address) by &n positions
+	macro
+	ROTR4	&loc,&n
+	aif	&n>16,.dorotl
+	lda	&loc+2
+	lcla	&i
+&i	seta	&n
+.rotrloop
+	lsr	a		;to set carry
+	ror     &loc
+	ror     &loc+2
+&i	seta	&i-1
+	aif	&i>0,.rotrloop
+	ago	.end
+.dorotl
+	ROTL4	&loc,32-&n
+.end
+	mend
+
+* Left-rotate 32-bit value in &loc (DP or 16-bit address) by &n positions
+	macro
+	ROTL4	&loc,&n
+	aif	&n>16,.dorotr
+        lda     &loc
+	lcla	&i
+&i	seta	&n
+.rotlloop
+        asl     a		;to set carry
+        rol     &loc+2
+        rol     &loc
+&i	seta	&i-1
+	aif	&i>0,.rotlloop
+	ago	.end
+.dorotr
+	ROTR4	&loc,32-&n
+.end
+	mend
+
+* &to := &from ROTR4 &n
+	macro
+	ROTR4MOVE &to,&from,&n
+	aif	&n>16,.dorotl
+        lda     &from
+        sta     &to
+        lda     &from+2
+        sta     &to+2
+	lcla	&i
+&i	seta	&n
+.rotrloop
+	lsr	a		;to set carry
+	ror     &to
+	ror     &to+2
+&i	seta	&i-1
+	aif	&i>0,.rotrloop
+	ago	.end
+dorotl
+	ROTL4MOVE &to,&from,32-&n
+.end
+	mend
+
+* &to := &from ROTL4 &n
+	macro
+	ROTL4MOVE &to,&from,&n
+	aif	&n>16,.dorotr
+        lda     &from+2
+        sta     &to+2
+        lda     &from
+        sta     &to
+	lcla	&i
+&i	seta	&n
+.rotlloop
+        asl     a		;to set carry
+        rol     &to+2
+        rol     &to
+&i	seta	&i-1
+	aif	&i>0,.rotlloop
+	ago	.end
+.dorotr
+	ROTR4MOVE &to,&from,32-&n
+.end
+	mend
+
+
 * This makes a function wrapper that is callable from C,
 * taking a pointer to the context structure as its argument.
 	macro
@@ -128,5 +211,142 @@
 	
 &i	seta	&i+1
 	aif	&i<80,.loop2
+	mend
+
+
+* One part of the loop for processing blocks (&part is 1, 2, 3, or 4)
+	macro
+	BlockLoopPart &part
+	
+loop&part anop
+	stx	idx
+	ROTL4MOVE temp,a_,5
+
+* f_0 to f_19
+	aif	&part<>1,.skip1
+	lda	c
+	eor	d
+	and	b
+	eor	d
+	clc
+	adc	#$7999
+	sta	f_plus_k
+	
+	lda	c+2
+	eor	d+2
+	and	b+2
+	eor	d+2
+	adc	#$5A82
+	sta	f_plus_k+2
+.skip1
+
+* f_20 to f_39
+	aif	&part<>2,.skip2
+	lda	b
+	eor	c
+	eor	d
+	clc
+	adc	#$EBA1
+	sta	f_plus_k
+	
+	lda	b+2
+	eor	c+2
+	eor	d+2
+	adc	#$6ED9
+	sta	f_plus_k+2
+.skip2
+
+* f_40 to f_59
+	aif	&part<>3,.skip3
+	lda	c
+	ora	d
+	and	b
+	sta	f40temp
+	lda	c
+	and	d
+	ora	f40temp
+	clc
+	adc	#$BCDC
+	sta	f_plus_k
+	
+	lda	c+2
+	ora	d+2
+	and	b+2
+	sta	f40temp
+	lda	c+2
+	and	d+2
+	ora	f40temp
+	adc	#$8F1B
+	sta	f_plus_k+2
+.skip3
+
+* f_60 to f_79
+	aif	&part<>4,.skip4
+	lda	b
+	eor	c
+	eor	d
+	clc
+	adc	#$C1D6
+	sta	f_plus_k
+	
+	lda	b+2
+	eor	c+2
+	eor	d+2
+	adc	#$CA62
+	sta	f_plus_k+2
+.skip4
+
+	ldx	idx
+	clc
+	lda	w,x
+	adc	temp
+	tay
+	lda	w+2,x
+	adc	temp+2
+	tax
+	clc
+	tya
+	adc	e
+	tay
+	txa
+	adc	e+2
+	tax
+	clc
+	tya
+	adc	f_plus_k
+	tay
+	txa
+	adc	f_plus_k+2
+	tax
+
+	lda	d
+	sta	e
+	lda	d+2
+	sta	e+2
+
+	lda	c
+	sta	d
+	lda	c+2
+	sta	d+2
+
+	ROTL4MOVE c,b,30
+	
+	lda	a_
+	sta	b
+	lda	a_+2
+	sta	b+2
+	
+	sty	a_
+	stx	a_+2
+
+	ldx	idx
+	inx
+	inx
+	inx
+	inx
+	cpx	#&part*20*4
+	bge	endloop&part
+	jmp	loop&part
+endloop&part anop
 	mend
 
