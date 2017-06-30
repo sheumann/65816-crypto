@@ -212,10 +212,7 @@ dorotl3
 * One iteration of the loop for processing blocks.
 * The a,b,c,d,e variables are given as parameters so we can aviod cycling them.
 	macro
-	BlockLoopIter &a,&b,&c,&d,&e,&part
-
-	stx	idx
-	ROTL4MOVE temp,&a,5
+	BlockLoopIter &a,&b,&c,&d,&e,&iter
 
 * f_0 to f_19
 	aif	&part<>1,.skip1
@@ -291,12 +288,13 @@ dorotl3
 	sta	f_plus_k+2
 .skip4
 
+	ROTL4MOVE temp,&a,5
 	ldx	idx
 	clc
-	lda	w,x
+	lda	w+&iter*4,x
 	adc	temp
 	tay
-	lda	w+2,x
+	lda	w+&iter*4+2,x
 	adc	temp+2
 	tax
 	clc
@@ -316,27 +314,27 @@ dorotl3
 
 	ROTL4	&b,30
 	
-	ldx	idx
-	inx
-	inx
-	inx
-	inx
 	mend
 
 
 * One part of the loop for processing blocks (20 iterations)
 	macro
 	BlockLoopPart &part
-	
-loop&part anop
-	
-	BlockLoopIter a_,b,c,d,e,&part
-	BlockLoopIter e,a_,b,c,d,&part
-	BlockLoopIter d,e,a_,b,c,&part
-	BlockLoopIter c,d,e,a_,b,&part
-	BlockLoopIter b,c,d,e,a_,&part
 
-	cpx	#20*4
+	lda	#0	
+loop&part anop
+	sta	idx
+	
+	BlockLoopIter a_,b,c,d,e,0
+	BlockLoopIter e,a_,b,c,d,1
+	BlockLoopIter d,e,a_,b,c,2
+	BlockLoopIter c,d,e,a_,b,3
+	BlockLoopIter b,c,d,e,a_,4
+
+	clc
+	lda	idx
+	adc	#4*5
+	cmp	#20*4
 	bge	endloop&part
 	jmp	loop&part
 endloop&part anop

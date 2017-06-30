@@ -88,16 +88,12 @@ SHA1_PROCESSCHUNK start
 	sta	e+2
 
 	ComputeSchedule 1
-	ldx	#0
 	BlockLoopPart 1
 	ComputeSchedule 2
-	ldx	#0
 	BlockLoopPart 2
 	ComputeSchedule 3
-	ldx	#0
 	BlockLoopPart 3
 	ComputeSchedule 4
-	ldx	#0
 	BlockLoopPart 4
 
 endloop clc
