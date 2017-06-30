@@ -2,14 +2,14 @@
 	mcopy	sha1.macros
 
 * Direct page locations	
-;chunk	gequ	0	; 8 bytes
+;chunk	gequ	0
 a_	gequ	8	; elements of state
 b	gequ	12
 c	gequ	16
 d	gequ	20
 e	gequ	24
 idx	gequ	28
-f40temp	gequ	30
+unused	gequ	30
 f_plus_k gequ	32
 temp	gequ	36
 h0	gequ	40
@@ -18,10 +18,6 @@ h2	gequ	48
 h3	gequ	52
 h4	gequ	56
 w	gequ	60
-
-initial_value privdata
-	dc h'67452301 efcdab89 98badcfe 10325476 c3d2e1f0'
-	end
 
 
 sha1_init start
