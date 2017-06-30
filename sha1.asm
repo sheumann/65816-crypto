@@ -9,7 +9,8 @@ b	gequ	12
 c	gequ	16
 d	gequ	20
 e	gequ	24
-unused	gequ	28	; result of function in hash computation
+idx	gequ	28
+f40temp	gequ	30
 f_plus_k gequ	32
 temp	gequ	36
 h0	gequ	40
@@ -90,13 +91,15 @@ SHA1_PROCESSCHUNK start
 	lda	h4+2
 	sta	e+2
 
-	ldy	#0
-loop	phy
-	cpy	#60
+	ldx	#0
+loop	anop
+	ROTL4MOVE temp,a_,5
+	stx	idx
+	cpx	#60*4
 	bge	f_60
-	cpy	#40
+	cpx	#40*4
 	bge	f_40
-	cpy	#20
+	cpx	#20*4
 	bge	f_20
 
 * f_0 to f_19
@@ -135,10 +138,10 @@ f_20	lda	b
 f_40	lda	c
 	ora	d
 	and	b
-	sta	temp
+	sta	f40temp
 	lda	c
 	and	d
-	ora	temp
+	ora	f40temp
 	clc
 	adc	#$BCDC
 	sta	f_plus_k
@@ -146,10 +149,10 @@ f_40	lda	c
 	lda	c+2
 	ora	d+2
 	and	b+2
-	sta	temp
+	sta	f40temp
 	lda	c+2
 	and	d+2
-	ora	temp
+	ora	f40temp
 	adc	#$8F1B
 	sta	f_plus_k+2
 	bra	after_f
@@ -167,14 +170,9 @@ f_60	lda	b
 	eor	d+2
 	adc	#$CA62
 	sta	f_plus_k+2
-	bra	after_f
 
 after_f	anop
-	ROTL4MOVE temp,a_,5
-	lda	1,s
-	asl	a
-	asl	a
-	tax
+	ldx	idx
 	clc
 	lda	w,x
 	adc	temp
@@ -192,10 +190,10 @@ after_f	anop
 	clc
 	tya
 	adc	f_plus_k
-	sta	temp
+	tay
 	txa
 	adc	f_plus_k+2
-	sta	temp+2
+	tax
 
 	lda	d
 	sta	e
@@ -214,14 +212,15 @@ after_f	anop
 	lda	a_+2
 	sta	b+2
 	
-	lda	temp
-	sta	a_
-	lda	temp+2
-	sta	a_+2
+	sty	a_
+	stx	a_+2
 
-	ply
-	iny
-	cpy	#80
+	ldx	idx
+	inx
+	inx
+	inx
+	inx
+	cpx	#80*4
 	bge	endloop
 	jmp	loop
 
