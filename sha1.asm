@@ -89,11 +89,11 @@ SHA1_PROCESSCHUNK start
 
 	ComputeSchedule 1
 	BlockLoopPart 1
-	ComputeSchedule 2
+	jsr	ComputeScheduleSub
 	BlockLoopPart 2
-	ComputeSchedule 3
+	jsr	ComputeScheduleSub
 	BlockLoopPart 3
-	ComputeSchedule 4
+	jsr	ComputeScheduleSub
 	BlockLoopPart 4
 
 endloop clc
@@ -137,4 +137,8 @@ endloop clc
 	sta	h4+2
 	
 	rtl
+
+ComputeScheduleSub anop
+	ComputeSchedule 2
+	rts
 	end
