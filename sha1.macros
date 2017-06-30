@@ -20,64 +20,64 @@
 * Left-rotate 32-bit value in &loc (DP or 16-bit address) by &n positions
 	macro
 	ROTL4	&loc,&n
-	aif	&n>16,.dorotr
+	aif	&n>16,.dorotr2
         lda     &loc
 	lcla	&i
 &i	seta	&n
-.rotlloop
+.rotlloop2
         asl     a		;to set carry
         rol     &loc+2
         rol     &loc
 &i	seta	&i-1
-	aif	&i>0,.rotlloop
-	ago	.end
-.dorotr
+	aif	&i>0,.rotlloop2
+	ago	.end2
+.dorotr2
 	ROTR4	&loc,32-&n
-.end
+.end2
 	mend
 
 * &to := &from ROTR4 &n
 	macro
 	ROTR4MOVE &to,&from,&n
-	aif	&n>16,.dorotl
+	aif	&n>16,.dorotl3
         lda     &from
         sta     &to
         lda     &from+2
         sta     &to+2
 	lcla	&i
 &i	seta	&n
-.rotrloop
+.rotrloop3
 	lsr	a		;to set carry
 	ror     &to
 	ror     &to+2
 &i	seta	&i-1
-	aif	&i>0,.rotrloop
-	ago	.end
-dorotl
+	aif	&i>0,.rotrloop3
+	ago	.end3
+dorotl3
 	ROTL4MOVE &to,&from,32-&n
-.end
+.end3
 	mend
 
 * &to := &from ROTL4 &n
 	macro
 	ROTL4MOVE &to,&from,&n
-	aif	&n>16,.dorotr
+	aif	&n>16,.dorotr4
         lda     &from+2
         sta     &to+2
         lda     &from
         sta     &to
 	lcla	&i
 &i	seta	&n
-.rotlloop
+.rotlloop4
         asl     a		;to set carry
         rol     &to+2
         rol     &to
 &i	seta	&i-1
-	aif	&i>0,.rotlloop
-	ago	.end
-.dorotr
+	aif	&i>0,.rotlloop4
+	ago	.end4
+.dorotr4
 	ROTR4MOVE &to,&from,32-&n
-.end
+.end4
 	mend
 
 
@@ -208,67 +208,68 @@ dorotl
 	mend
 
 
-* One part of the loop for processing blocks (&part is 1, 2, 3, or 4)
+
+* One iteration of the loop for processing blocks.
+* The a,b,c,d,e variables are given as parameters so we can aviod cycling them.
 	macro
-	BlockLoopPart &part
-	
-loop&part anop
+	BlockLoopIter &a,&b,&c,&d,&e,&part
+
 	stx	idx
-	ROTL4MOVE temp,a_,5
+	ROTL4MOVE temp,&a,5
 
 * f_0 to f_19
 	aif	&part<>1,.skip1
-	lda	c
-	eor	d
-	and	b
-	eor	d
+	lda	&c
+	eor	&d
+	and	&b
+	eor	&d
 	clc
 	adc	#$7999
 	sta	f_plus_k
 	
-	lda	c+2
-	eor	d+2
-	and	b+2
-	eor	d+2
+	lda	&c+2
+	eor	&d+2
+	and	&b+2
+	eor	&d+2
 	adc	#$5A82
 	sta	f_plus_k+2
 .skip1
 
 * f_20 to f_39
 	aif	&part<>2,.skip2
-	lda	b
-	eor	c
-	eor	d
+	lda	&b
+	eor	&c
+	eor	&d
 	clc
 	adc	#$EBA1
 	sta	f_plus_k
 	
-	lda	b+2
-	eor	c+2
-	eor	d+2
+	lda	&b+2
+	eor	&c+2
+	eor	&d+2
 	adc	#$6ED9
 	sta	f_plus_k+2
 .skip2
 
 * f_40 to f_59
 	aif	&part<>3,.skip3
-	lda	c
-	ora	d
-	and	b
+	lda	&c
+	ora	&d
+	and	&b
 	sta	f40temp
-	lda	c
-	and	d
+	lda	&c
+	and	&d
 	ora	f40temp
 	clc
 	adc	#$BCDC
 	sta	f_plus_k
 	
-	lda	c+2
-	ora	d+2
-	and	b+2
+	lda	&c+2
+	ora	&d+2
+	and	&b+2
 	sta	f40temp
-	lda	c+2
-	and	d+2
+	lda	&c+2
+	and	&d+2
 	ora	f40temp
 	adc	#$8F1B
 	sta	f_plus_k+2
@@ -276,16 +277,16 @@ loop&part anop
 
 * f_60 to f_79
 	aif	&part<>4,.skip4
-	lda	b
-	eor	c
-	eor	d
+	lda	&b
+	eor	&c
+	eor	&d
 	clc
 	adc	#$C1D6
 	sta	f_plus_k
 	
-	lda	b+2
-	eor	c+2
-	eor	d+2
+	lda	&b+2
+	eor	&c+2
+	eor	&d+2
 	adc	#$CA62
 	sta	f_plus_k+2
 .skip4
@@ -300,44 +301,41 @@ loop&part anop
 	tax
 	clc
 	tya
-	adc	e
+	adc	&e
 	tay
 	txa
-	adc	e+2
+	adc	&e+2
 	tax
 	clc
 	tya
 	adc	f_plus_k
-	tay
+	sta	&e
 	txa
 	adc	f_plus_k+2
-	tax
+	sta	&e+2
 
-	lda	d
-	sta	e
-	lda	d+2
-	sta	e+2
-
-	lda	c
-	sta	d
-	lda	c+2
-	sta	d+2
-
-	ROTL4MOVE c,b,30
+	ROTL4	&b,30
 	
-	lda	a_
-	sta	b
-	lda	a_+2
-	sta	b+2
-	
-	sty	a_
-	stx	a_+2
-
 	ldx	idx
 	inx
 	inx
 	inx
 	inx
+	mend
+
+
+* One part of the loop for processing blocks (20 iterations)
+	macro
+	BlockLoopPart &part
+	
+loop&part anop
+	
+	BlockLoopIter a_,b,c,d,e,&part
+	BlockLoopIter e,a_,b,c,d,&part
+	BlockLoopIter d,e,a_,b,c,&part
+	BlockLoopIter c,d,e,a_,b,&part
+	BlockLoopIter b,c,d,e,a_,&part
+
 	cpx	#20*4
 	bge	endloop&part
 	jmp	loop&part
