@@ -105,81 +105,72 @@ dorotl
 * Macros to operate on elements of the message schedule (W)
 	macro
 &lab	lda_w	&i,&inc
+	lcla	&j
+&j	seta	&i
+.modloop1
+	aif	&j<20,.goodidx1
+&j	seta	&j-20
+	ago	.modloop1
+.goodidx1
 	aif	C:&inc<>0,.haveinc
 	lcla	&inc
 .haveinc
-	aif	w+(&i)*4+&inc>255,.bigidx
-&lab	lda	w+(&i)*4+&inc
-	ago	.end
-.bigidx
-&lab	ldx	#((&i)-16)*4+&inc
-	lda	w+16*4,x
-.end
+&lab	lda	w+(&j)*4+&inc
 	mend
 
 	macro
 &lab	eor_w	&i,&inc
+	lcla	&j
+&j	seta	&i
+.modloop2
+	aif	&j<20,.goodidx2
+&j	seta	&j-20
+	ago	.modloop2
+.goodidx2
 	aif	C:&inc<>0,.haveinc
 	lcla	&inc
 .haveinc
-	aif	w+(&i)*4+&inc>255,.bigidx
-&lab	eor	w+(&i)*4+&inc
-	ago	.end
-.bigidx
-&lab	ldx	#((&i)-16)*4+&inc
-	eor	w+16*4,x
-.end
+&lab	eor	w+(&j)*4+&inc
 	mend
 
 	macro
 &lab	sta_w	&i,&inc
+	lcla	&j
+&j	seta	&i
+.modloop3
+	aif	&j<20,.goodidx3
+&j	seta	&j-20
+	ago	.modloop3
+.goodidx3
 	aif	C:&inc<>0,.haveinc
 	lcla	&inc
 .haveinc
-	aif	w+(&i)*4+&inc>255,.bigidx
-&lab	sta	w+(&i)*4+&inc
-	ago	.end
-.bigidx
-&lab	ldx	#((&i)-16)*4+&inc
-	sta	w+16*4,x
-.end
-	mend
-
-	macro
-&lab	inc_w	&i,&inc
-	aif	C:&inc<>0,.haveinc
-	lcla	&inc
-.haveinc
-	aif	w+(&i)*4+&inc>255,.bigidx
-&lab	inc	w+(&i)*4+&inc
-	ago	.end
-.bigidx
-&lab	ldx	#((&i)-16)*4+&inc
-	inc	w+16*4,x
-.end
+&lab	sta	w+(&j)*4+&inc
 	mend
 
 	macro
 &lab	rol_w	&i,&inc
+	lcla	&j
+&j	seta	&i
+.modloop4
+	aif	&j<20,.goodidx4
+&j	seta	&j-20
+	ago	.modloop4
+.goodidx4
 	aif	C:&inc<>0,.haveinc
 	lcla	&inc
 .haveinc
-	aif	w+(&i)*4+&inc>255,.bigidx
-&lab	rol	w+(&i)*4+&inc
-	ago	.end
-.bigidx
-&lab	ldx	#((&i)-16)*4+&inc
-	rol	w+16*4,x
-.end
+&lab	rol	w+(&j)*4+&inc
 	mend
 
 
-* Compute the message schedule (W_0 to W_79) 
+* Compute one part of the message schedule (20 elements)
 	macro
-	ComputeSchedule
+	ComputeSchedule &part
 	lcla	&i
 
 ; Flip the endianness of W_0 to W_15 (the current chunk of the message)
+	aif	&part<>1,.skippart1
 .loop1
 	lda	w+&i*4
 	xba
@@ -190,8 +181,11 @@ dorotl
 	sta	w+&i*4
 &i	seta	&i+1
 	aif	&i<16,.loop1
+.skippart1
 
 ; compute the rest of the message schedule (W_16 to W_79)
+	aif	&part=1,.loop2
+&i	seta	(&part-1)*20
 .loop2
 	lda_w	&i-3
 	eor_w	&i-8
@@ -210,7 +204,7 @@ dorotl
 	rol_w	&i
 	
 &i	seta	&i+1
-	aif	&i<80,.loop2
+	aif	&i<&part*20,.loop2
 	mend
 
 
@@ -344,7 +338,7 @@ loop&part anop
 	inx
 	inx
 	inx
-	cpx	#&part*20*4
+	cpx	#20*4
 	bge	endloop&part
 	jmp	loop&part
 endloop&part anop
