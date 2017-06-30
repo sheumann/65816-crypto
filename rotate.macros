@@ -1,0 +1,81 @@
+* Right-rotate 32-bit value in &loc (DP or 16-bit address) by &n positions
+	macro
+	ROTR4	&loc,&n
+	aif	&n>16,.dorotl
+	lda	&loc+2
+	lcla	&i
+&i	seta	&n
+.rotrloop
+	lsr	a		;to set carry
+	ror     &loc
+	ror     &loc+2
+&i	seta	&i-1
+	aif	&i>0,.rotrloop
+	ago	.end
+.dorotl
+	ROTL4	&loc,32-&n
+.end
+	mend
+
+* Left-rotate 32-bit value in &loc (DP or 16-bit address) by &n positions
+	macro
+	ROTL4	&loc,&n
+	aif	&n>16,.dorotr
+        lda     &loc
+	lcla	&i
+&i	seta	&n
+.rotlloop
+        asl     a		;to set carry
+        rol     &loc+2
+        rol     &loc
+&i	seta	&i-1
+	aif	&i>0,.rotlloop
+	ago	.end
+.dorotr
+	ROTR4	&loc,32-&n
+.end
+	mend
+
+* &to := &from ROTR4 &n
+	macro
+	ROTR4MOVE &to,&from,&n
+	aif	&n>16,.dorotl
+        lda     &from
+        sta     &to
+        lda     &from+2
+        sta     &to+2
+	lcla	&i
+&i	seta	&n
+.rotrloop
+	lsr	a		;to set carry
+	ror     &to
+	ror     &to+2
+&i	seta	&i-1
+	aif	&i>0,.rotrloop
+	ago	.end
+dorotl
+	ROTL4MOVE &to,&from,32-&n
+.end
+	mend
+
+* &to := &from ROTL4 &n
+	macro
+	ROTL4MOVE &to,&from,&n
+	aif	&n>16,.dorotr
+        lda     &from+2
+        sta     &to+2
+        lda     &from
+        sta     &to
+	lcla	&i
+&i	seta	&n
+.rotlloop
+        asl     a		;to set carry
+        rol     &to+2
+        rol     &to
+&i	seta	&i-1
+	aif	&i>0,.rotlloop
+	ago	.end
+.dorotr
+	ROTR4MOVE &to,&from,32-&n
+.end
+	mend
