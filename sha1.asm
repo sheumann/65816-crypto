@@ -1,3 +1,23 @@
+* Copyright (c) 2017 Stephen Heumann
+*
+* Permission to use, copy, modify, and distribute this software for any
+* purpose with or without fee is hereby granted, provided that the above
+* copyright notice and this permission notice appear in all copies.
+*
+* THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+* WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+* MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+* ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+* WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+* ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+* OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+
+
+* Implementation of the SHA-1 hash function for the 65816
+*
+* The basic structure of the hash computation is described in FIPS PUB 180-4,
+* although this implementation rearranges some things for better performance.
+
 	case	on
 	mcopy	sha1.macros
 
@@ -20,6 +40,8 @@ h4	gequ	56
 w	gequ	60
 
 
+* Initialize a SHA-1 context.
+* This must be called before any of the other SHA-1 functions.
 sha1_init start
 	CFunction SHA1_INIT
 	end
@@ -59,11 +81,13 @@ SHA1_INIT start
 	end
 
 
-sha1_processchunk start
-	CFunction SHA1_PROCESSCHUNK
+* Process one 64-byte block through the SHA-1 hashing function.
+* This is a low-level function; users should normally not call this directly.
+sha1_processblock start
+	CFunction SHA1_PROCESSBLOCK
 	end
 
-SHA1_PROCESSCHUNK start
+SHA1_PROCESSBLOCK start
 	lda	h0
 	sta	a_
 	lda	h0+2

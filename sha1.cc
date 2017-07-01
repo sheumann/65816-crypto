@@ -1,3 +1,19 @@
+/*
+ * Copyright (c) 2017 Stephen Heumann
+ *
+ * Permission to use, copy, modify, and distribute this software for any
+ * purpose with or without fee is hereby granted, provided that the above
+ * copyright notice and this permission notice appear in all copies.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+ * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+ * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+ * ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+ * WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+ * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+ * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+ */
+
 #pragma noroot
 #pragma lint -1
 #pragma optimize -1
@@ -10,8 +26,11 @@
 #define hash_offset 40
 #define data_offset 60
 
-extern void SHA1_PROCESSCHUNK(void);
+extern void SHA1_PROCESSBLOCK(void);
 
+/*
+ * Update a SHA-1 context based on the specified data.
+ */
 void sha1_update(struct sha1_context *context,
                  const unsigned char *data,
                  unsigned long length)
@@ -24,58 +43,61 @@ void sha1_update(struct sha1_context *context,
 
     if (extra > 0) {
         if (length >= 64 - extra) {
-            memcpy(&context->chunk[extra], data, 64 - extra);
+            memcpy(&context->block[extra], data, 64 - extra);
             asm {
                 phd
                 lda context
                 tcd
-                jsl SHA1_PROCESSCHUNK
+                jsl SHA1_PROCESSBLOCK
                 pld
             }
             length -= 64 - extra;
             data += 64 - extra;
         } else {
-            memcpy(&context->chunk[extra], data, length);
+            memcpy(&context->block[extra], data, length);
             context->extra += length;
             return;
         }
     }
     
     while (length >= 64) {
-        memcpy(&context->chunk, data, 64);
+        memcpy(&context->block, data, 64);
         asm {
             phd
             lda context
             tcd
-            jsl SHA1_PROCESSCHUNK
+            jsl SHA1_PROCESSBLOCK
             pld
         }
         length -= 64;
         data += 64;
     }
 
-    memcpy(&context->chunk, data, length);
+    memcpy(&context->block, data, length);
     context->extra = length;
 }
 
 
+/*
+ * Finish SHA-1 processing and generate the final hash code.
+ */
 void sha1_finalize(struct sha1_context *context)
 {
     unsigned int extra = context->extra;
 
-    context->chunk[extra++] = 0x80;
+    context->block[extra++] = 0x80;
     
-    memset(&context->chunk[extra], 0, 64 - extra);
+    memset(&context->block[extra], 0, 64 - extra);
     
     if (extra > 64 - 8) {
         asm {
             phd
             lda context
             tcd
-            jsl SHA1_PROCESSCHUNK
+            jsl SHA1_PROCESSBLOCK
             pld
         }
-        memset(&context->chunk, 0, 64 - 8);
+        memset(&context->block, 0, 64 - 8);
     }
     
     asm {
@@ -111,7 +133,7 @@ void sha1_finalize(struct sha1_context *context)
         sta data_offset+62
         
         /* Process final block */
-        jsl SHA1_PROCESSCHUNK
+        jsl SHA1_PROCESSBLOCK
 
         /* Flip hash state words to big-endian order */
         lda hash_offset
