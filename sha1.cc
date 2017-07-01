@@ -17,13 +17,21 @@ void sha1_update(struct sha1_context *context,
                  unsigned long length)
 {
     unsigned int extra = context->extra;
+    unsigned long oldlength = context->length;
 
-    context->length += length;
+    if ((context->length += length) < oldlength)
+        context->length2++;
 
     if (extra > 0) {
         if (length >= 64 - extra) {
             memcpy(&context->chunk[extra], data, 64 - extra);
-            sha1_processchunk(context);
+            asm {
+                phd
+                lda context
+                tcd
+                jsl SHA1_PROCESSCHUNK
+                pld
+            }
             length -= 64 - extra;
             data += 64 - extra;
         } else {
@@ -35,7 +43,13 @@ void sha1_update(struct sha1_context *context,
     
     while (length >= 64) {
         memcpy(&context->chunk, data, 64);
-        sha1_processchunk(context);
+        asm {
+            phd
+            lda context
+            tcd
+            jsl SHA1_PROCESSCHUNK
+            pld
+        }
         length -= 64;
         data += 64;
     }
@@ -54,16 +68,22 @@ void sha1_finalize(struct sha1_context *context)
     memset(&context->chunk[extra], 0, 64 - extra);
     
     if (extra > 64 - 8) {
-        sha1_processchunk(context);
-        memset(&context->chunk, 0, 64);
+        asm {
+            phd
+            lda context
+            tcd
+            jsl SHA1_PROCESSCHUNK
+            pld
+        }
+        memset(&context->chunk, 0, 64 - 8);
     }
     
-    /* Append total length in bits */
     asm {
         phd
         lda context
         tcd
         
+        /* Append total length in bits */
         asl length_offset
         rol length_offset+2
         rol length_offset+4
@@ -90,8 +110,10 @@ void sha1_finalize(struct sha1_context *context)
         xba
         sta data_offset+62
         
+        /* Process final block */
         jsl SHA1_PROCESSCHUNK
 
+        /* Flip hash state words to big-endian order */
         lda hash_offset
         xba
         tay
