@@ -2,14 +2,14 @@
 	mcopy	sha1.macros
 
 * Direct page locations	
-;chunk	gequ	0
-a_	gequ	8	; elements of state
-b	gequ	12
-c	gequ	16
-d	gequ	20
-e	gequ	24
-idx	gequ	28
-unused	gequ	30
+length	gequ	0
+extra	gequ	8
+idx	gequ	10
+a_	gequ	12	; elements of state
+b	gequ	16
+c	gequ	20
+d	gequ	24
+e	gequ	28
 f_plus_k gequ	32
 temp	gequ	36
 h0	gequ	40
@@ -49,6 +49,12 @@ SHA1_INIT start
 	sta	h4
 	lda	#$C3D2
 	sta	h4+2
+	
+	stz	length
+	stz	length+2
+	stz	length+4
+	stz	length+6
+	stz	extra
 	rtl
 	end
 

@@ -1,11 +1,16 @@
 struct sha1_context {
-	unsigned char reserved1[8];
-	unsigned long a,b,c,d,e;
-	unsigned char reserved2[12];
-	unsigned long h0,h1,h2,h3,h4;
+	unsigned long length;
+	unsigned long length2;
+	unsigned short extra;
+	unsigned char reserved1[30];
+	unsigned char hash[20];
 	unsigned char chunk[64];
-	unsigned char reserved3[300];
+	unsigned char reserved2[16];
 };
 
-int sha1_init(struct sha1_context *context);
-int sha1_processchunk(struct sha1_context *context);
+void sha1_init(struct sha1_context *context);
+void sha1_processchunk(struct sha1_context *context);
+
+void sha1_update(struct sha1_context *context, const unsigned char *data, unsigned long length);
+
+void sha1_finalize(struct sha1_context *context);
