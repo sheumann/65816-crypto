@@ -1,5 +1,9 @@
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
+#include <Memory.h>
+#include <MiscTool.h>
+#include <orca.h>
 #include "aes.h"
 
 unsigned char iv[16] = {
@@ -39,6 +43,8 @@ unsigned char plaintext[64] = {
 unsigned char output[64];
 unsigned char output2[64];
 
+#define BUFSIZE 64000
+
 static void printhex(char *str, unsigned char *buf, unsigned int count) {
     unsigned int i;
 
@@ -53,37 +59,69 @@ static void printhex(char *str, unsigned char *buf, unsigned int count) {
 }
 
 int main(void) {
-    struct aes_context context;
+    struct aes_context **context_hndl;
+    struct aes_context *context;
+    unsigned char *inbuf, *outbuf;
+    unsigned long tick_count;
+    long double bytes_per_sec;
+
+    context_hndl = (struct aes_context **)NewHandle(sizeof(struct aes_context),
+                userid(), attrFixed|attrPage|attrBank|attrNoCross, 0x000000);
+    if (toolerror())
+        return 0;
+    context = *context_hndl;
     
-    memcpy(context.key, key128, 16);
-    aes128_expandkey(&context);
+    memcpy(context->key, key128, 16);
+    aes128_expandkey(context);
     
-    memcpy(context.data, iv, 16);
-    aes_cbc_encrypt(&context, plaintext, output, 4);
+    memcpy(context->data, iv, 16);
+    aes_cbc_encrypt(context, plaintext, output, 4);
     printhex("AES-128 ciphertext:", output, 64);
     
-    aes_cbc_decrypt(&context, output, output2, 4, iv);
+    aes_cbc_decrypt(context, output, output2, 4, iv);
     printhex("Decrypted plaintext:", output2, 64);
 
     
-    memcpy(context.key, key192, 24);
-    aes192_expandkey(&context);
+    memcpy(context->key, key192, 24);
+    aes192_expandkey(context);
     
-    memcpy(context.data, iv, 16);
-    aes_cbc_encrypt(&context, plaintext, output, 4);
+    memcpy(context->data, iv, 16);
+    aes_cbc_encrypt(context, plaintext, output, 4);
     printhex("AES-192 ciphertext:", output, 64);
     
-    aes_cbc_decrypt(&context, output, output2, 4, iv);
+    aes_cbc_decrypt(context, output, output2, 4, iv);
     printhex("Decrypted plaintext:", output2, 64);
 
 
-    memcpy(context.key, key256, 32);
-    aes256_expandkey(&context);
+    memcpy(context->key, key256, 32);
+    aes256_expandkey(context);
     
-    memcpy(context.data, iv, 16);
-    aes_cbc_encrypt(&context, plaintext, output, 4);
+    memcpy(context->data, iv, 16);
+    aes_cbc_encrypt(context, plaintext, output, 4);
     printhex("AES-256 ciphertext:", output, 64);
     
-    aes_cbc_decrypt(&context, output, output2, 4, iv);
+    aes_cbc_decrypt(context, output, output2, 4, iv);
     printhex("Decrypted plaintext:", output2, 64);
+    
+    /* Timing tests */
+    inbuf = calloc(BUFSIZE, 1);
+    outbuf = malloc(BUFSIZE);
+    if (inbuf == NULL || outbuf == NULL)
+        return -1;
+    
+    memcpy(context->key, key128, 16);
+    aes128_expandkey(context);
+    memcpy(context->data, iv, 16);
+    
+    tick_count = GetTick();
+    aes_cbc_encrypt(context, inbuf, outbuf, BUFSIZE / 16);
+    tick_count = GetTick() - tick_count;
+    bytes_per_sec = (long double)BUFSIZE * 60 / tick_count;
+    printf("AES-128 CBC encryption: %lf bytes/sec\n", bytes_per_sec);
+
+    tick_count = GetTick();
+    aes_cbc_decrypt(context, inbuf, outbuf, BUFSIZE / 16, iv);
+    tick_count = GetTick() - tick_count;
+    bytes_per_sec = (long double)BUFSIZE * 60 / tick_count;
+    printf("AES-128 CBC decryption: %lf bytes/sec\n", bytes_per_sec);
 }
