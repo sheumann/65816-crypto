@@ -75,3 +75,18 @@ void aes_cbc_decrypt(struct aes_context *context,
                      unsigned char *out,
                      unsigned long nblocks,
                      const unsigned char *iv);
+
+/*
+ * Process data using AES-128, AES-192, or AES-256 in CTR mode.
+ * This either encrypts or decrypts data, depending on whether
+ * in contains plaintext or ciphertext.
+ * The key must have been specified via aes{128,192,256}_expandkey().
+ * nblocks gives the number of 16-byte blocks to be processed.
+ * counter will be interpreted as a 128-bit big-endian integer,
+ * and incremented for each block processed.
+ */
+void aes_ctr_process(struct aes_context *context,
+                     const unsigned char *in,
+                     unsigned char *out,
+                     unsigned long nblocks,
+                     const unsigned char *counter);

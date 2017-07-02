@@ -281,3 +281,112 @@ void aes_cbc_decrypt(struct aes_context *context,
         out += 16;
     }
 }
+
+/*
+ * Process data using AES-128, AES-192, or AES-256 in CTR mode.
+ * This either encrypts or decrypts data, depending on whether
+ * in contains plaintext or ciphertext.
+ * The key must have been specified via aes{128,192,256}_expandkey().
+ * nblocks gives the number of 16-byte blocks to be processed.
+ * counter will be interpreted as a 128-bit big-endian integer,
+ * and incremented for each block processed.
+ */
+void aes_ctr_process(struct aes_context *context,
+                     const unsigned char *in,
+                     unsigned char *out,
+                     unsigned long nblocks,
+                     const unsigned char *counter)
+{
+    while (nblocks-- > 0) {
+        asm {
+            lda [counter]
+            sta [context]
+            ldy #2
+            lda [counter],y
+            sta [context],y
+            iny
+            iny
+            lda [counter],y
+            sta [context],y
+            iny
+            iny
+            lda [counter],y
+            sta [context],y
+            iny
+            iny
+            lda [counter],y
+            sta [context],y
+            iny
+            iny
+            lda [counter],y
+            sta [context],y
+            iny
+            iny
+            lda [counter],y
+            sta [context],y
+            iny
+            iny
+            lda [counter],y
+            sta [context],y
+            
+            phd
+            lda context
+            tcd
+            jsl AES_ENCRYPT
+            pld
+        
+            lda [context]
+            eor [in]
+            sta [out]
+            ldy #2
+            lda [context],y
+            eor [in],y
+            sta [out],y
+            iny
+            iny
+            lda [context],y
+            eor [in],y
+            sta [out],y
+            iny
+            iny
+            lda [context],y
+            eor [in],y
+            sta [out],y
+            iny
+            iny
+            lda [context],y
+            eor [in],y
+            sta [out],y
+            iny
+            iny
+            lda [context],y
+            eor [in],y
+            sta [out],y
+            iny
+            iny
+            lda [context],y
+            eor [in],y
+            sta [out],y
+            iny
+            iny
+            lda [context],y
+            eor [in],y
+            sta [out],y
+
+            ldy #14
+incloop:    lda [counter],y
+            xba
+            inc a
+            xba
+            sta [counter],y
+            bne incdone
+            dey
+            dey
+            bpl incloop
+incdone:
+        }
+        in += 16;
+        out += 16;
+    }
+}
+
