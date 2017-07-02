@@ -377,6 +377,10 @@ finish_aes128 anop
 * The encrypted input and unencrypted output are in state1.
 
 * Callable from C, with context structure pointer on stack.
+aes_decrypt start
+	CFunction AES_DECRYPT
+	end
+
 aes128_decrypt start
 	CFunction AES128_DECRYPT
 	end
@@ -391,9 +395,18 @@ aes256_decrypt start
 
 * Call with DP = AES context structure (with key expanded),
 *           DP = bank containing AES tables.
-AES256_DECRYPT start
+AES_DECRYPT start
 	using	tables
 	ShortRegs
+	lda	keysize
+	bne	not128
+	jmp	aes128_decrypt_internal
+not128	bmi	aes256_decrypt_internal
+	jmp	aes192_decrypt_internal
+
+AES256_DECRYPT entry
+	ShortRegs
+aes256_decrypt_internal anop
 	InvFinalRound 14
 	InvNormalRound 13
 	InvNormalRound 12
@@ -401,6 +414,7 @@ AES256_DECRYPT start
 
 AES192_DECRYPT entry
 	ShortRegs
+aes192_decrypt_internal anop
 	InvFinalRound 12
 cont1	anop
 	InvNormalRound 11
@@ -409,6 +423,7 @@ cont1	anop
 	
 AES128_DECRYPT entry
 	ShortRegs
+aes128_decrypt_internal anop
 	InvFinalRound 10
 cont2	anop
 	InvNormalRound 9

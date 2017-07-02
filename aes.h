@@ -45,8 +45,33 @@ void aes_encrypt(struct aes_context *context);
 
 /*
  * AES decryption functions
+ * aes_decrypt does AES-128, AES-192, or AES-256 decryption, based on the key.
+ * The others use a specific key size; a corresponding key must have been used.
  * The encrypted input and unencrypted output are in context->data.
  */
+void aes_decrypt(struct aes_context *context);
 void aes128_decrypt(struct aes_context *context);
 void aes192_decrypt(struct aes_context *context);
 void aes256_decrypt(struct aes_context *context);
+
+/*
+ * Encrypt data using AES-128, AES-192, or AES-256 in CBC mode.
+ * The key must have been specified via aes{128,192,256}_expandkey().
+ * The initialization vector (IV) must be in context->data.
+ * nblocks gives the number of 16-byte blocks to be processed.
+ */
+void aes_cbc_encrypt(struct aes_context *context,
+                     const unsigned char *in,
+                     unsigned char *out,
+                     unsigned long nblocks);
+
+/*
+ * Decrypt data using AES-128, AES-192, or AES-256 in CBC mode.
+ * The key must have been specified via aes{128,192,256}_expandkey().
+ * nblocks gives the number of 16-byte blocks to be processed.
+ */
+void aes_cbc_decrypt(struct aes_context *context,
+                     const unsigned char *in,
+                     unsigned char *out,
+                     unsigned long nblocks,
+                     const unsigned char *iv);
