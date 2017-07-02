@@ -23,12 +23,10 @@ void aes_cbc_encrypt(struct aes_context *context,
 
     while (nblocks-- > 0) {
         asm {
-            ldy #0
-            lda [in],y
-            eor [context],y
-            sta [context],y
-            iny
-            iny
+            lda [in]
+            eor [context]
+            sta [context]
+            ldy #2
             lda [in],y
             eor [context],y
             sta [context],y
@@ -67,9 +65,38 @@ void aes_cbc_encrypt(struct aes_context *context,
             lda context
             tcd
             jsl AES_ENCRYPT
+            lda 0
             pld
+            
+            sta [out]
+            ldy #2
+            lda [context],y
+            sta [out],y
+            iny
+            iny
+            lda [context],y
+            sta [out],y
+            iny
+            iny
+            lda [context],y
+            sta [out],y
+            iny
+            iny
+            lda [context],y
+            sta [out],y
+            iny
+            iny
+            lda [context],y
+            sta [out],y
+            iny
+            iny
+            lda [context],y
+            sta [out],y
+            iny
+            iny
+            lda [context],y
+            sta [out],y
         }
-        memcpy(out, context->data, 16);
         in += 16;
         out += 16;
     }
@@ -90,8 +117,37 @@ void aes_cbc_decrypt(struct aes_context *context,
     if (nblocks-- == 0)
         return;
 
-    memcpy(context->data, in, 16);
     asm {
+        lda [in]
+        sta [context]
+        ldy #2
+        lda [in],y
+        sta [context],y
+        iny
+        iny
+        lda [in],y
+        sta [context],y
+        iny
+        iny
+        lda [in],y
+        sta [context],y
+        iny
+        iny
+        lda [in],y
+        sta [context],y
+        iny
+        iny
+        lda [in],y
+        sta [context],y
+        iny
+        iny
+        lda [in],y
+        sta [context],y
+        iny
+        iny
+        lda [in],y
+        sta [context],y
+            
         phd
         lda context
         tcd
@@ -138,18 +194,49 @@ void aes_cbc_decrypt(struct aes_context *context,
         eor [iv],y
         sta [out],y
     }
-    //in += 16;
+    in += 16;
     out += 16;
 
     while (nblocks-- > 0) {
-        memcpy(context->data, in+16, 16);
         asm {
+            lda [in]
+            sta [context]
+            ldy #2
+            lda [in],y
+            sta [context],y
+            iny
+            iny
+            lda [in],y
+            sta [context],y
+            iny
+            iny
+            lda [in],y
+            sta [context],y
+            iny
+            iny
+            lda [in],y
+            sta [context],y
+            iny
+            iny
+            lda [in],y
+            sta [context],y
+            iny
+            iny
+            lda [in],y
+            sta [context],y
+            iny
+            iny
+            lda [in],y
+            sta [context],y
+        
             phd
             lda context
             tcd
             jsl AES_DECRYPT
             pld
-        
+        }
+        in -= 16;
+        asm {
             ldy #0
             lda [context],y
             eor [in],y
@@ -190,7 +277,7 @@ void aes_cbc_decrypt(struct aes_context *context,
             eor [in],y
             sta [out],y
         }
-        in += 16;
+        in += 32;
         out += 16;
     }
 }
