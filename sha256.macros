@@ -229,7 +229,16 @@
 ; compute the rest of the message schedule (W_16 to W_63)
 &i	seta	(&part-1)*16
 .loop2
-	ROTR4MOVE_w temp1,&i-15,7
+	lda_w	&i-15,1
+	sta	temp1
+	lda_w	&i-15,-1
+	and	#$FF00
+	sta	temp1+2
+	lda_w	&i-15,3
+	and	#$00FF
+	ora	temp1+2
+	sta	temp1+2
+	ROTL4	temp1,1
 	lda_w	&i-15
 	sta	temp2+2
 	lda_w	&i-15,2
@@ -252,7 +261,16 @@
 	sta	temp2
 	ROTR4	temp2,1
 	ROTR4MOVE temp3,temp2,2
-	ROTL4MOVE temp4,temp2,7
+	lda	temp2+1
+	sta	temp4+2
+	lda	temp2-1
+	and	#$FF00
+	sta	temp4
+	lda	temp2+3
+	and	#$00FF
+	ora	temp4
+	sta	temp4
+	ROTR4	temp4,1
 	lda	temp4
 	eor	temp3
 	eor	temp2
@@ -299,9 +317,27 @@
 	BlockLoopIter &a,&b,&c,&d,&e,&f,&g,&h,&iter
 	
 ; Sigma_1 computation
-	ROTR4MOVE temp1,&e,6
+	lda	&e+1
+	sta	temp1
+	lda	&e-1
+	and	#$FF00
+	sta	temp1+2
+	lda	&e+3
+	and	#$00FF
+	ora	temp1+2
+	sta	temp1+2
+	ROTL4	temp1,2
 	ROTR4MOVE temp2,temp1,5
-	ROTR4MOVE temp3,&e,25
+	lda	&e+1
+	sta	temp3+2
+	lda	&e-1
+	and	#$FF00
+	sta	temp3
+	lda	&e+3
+	and	#$00FF
+	ora	temp3
+	sta	temp3
+	ROTR4	temp3,1
 	lda	temp1
 	eor	temp2
 	eor	temp3
