@@ -280,13 +280,21 @@
 	lda_w	&i-15
 	sta	temp2+2
 	ROTR4CONT temp2,2
-	ROTR4MOVE_w temp3,&i-15,3
+	lda_w	&i-15,2
+	lsr	a
+	sta	temp3+2
+	lda_w	&i-15
+	ror	a
+	sta	temp3
+	lsr	temp3+2
+	ror	temp3
+	lsr	temp3+2
 	lda	temp3
+	ror	a
 	eor	temp2
 	eor	temp1
 	sta	temp1
 	lda	temp3+2
-	and	#$1FFF
 	eor	temp2+2
 	eor	temp1+2
 	sta	temp1+2
@@ -297,21 +305,22 @@
 	sta	temp2+2
 	ROTR4CONT temp2,1
 	ROTR4MOVE temp3,temp2,2
-	lda	temp2-1
-	and	#$FF00
-	sta	temp4
-	lda	temp2+3
+	lda_w	&i-2,3
 	and	#$00FF
-	ora	temp4
-	sta	temp4
-	lda	temp2+1
-	sta	temp4+2
-	ROTR4CONT temp4,1
-	lda	temp4
+	lsr	a
+	tay
+	lda_w	&i-2,1
+	ror	a
+	tax
+	tya
+	lsr	a
+	tay
+	txa
+	ror	a
 	eor	temp3
 	eor	temp2
 	sta	temp2
-	lda	temp4+2
+	tya
 	and	#$003F
 	eor	temp3+2
 	eor	temp2+2
