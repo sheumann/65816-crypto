@@ -32,11 +32,47 @@
 .end
 	mend
 
+* Expects the contents of &loc+2 to be loaded in A already
+	macro
+	ROTR4CONT &loc,&n
+	aif	&n>16,.dorotl
+	lcla	&i
+&i	seta	&n
+.rotrloop
+	lsr	a		;to set carry
+	ror     &loc
+	ror     &loc+2
+&i	seta	&i-1
+	aif	&i>0,.rotrloop
+	ago	.end
+.dorotl
+	ROTL4	&loc,32-&n
+.end
+	mend
+
 * Left-rotate 32-bit value in &loc (DP or 16-bit address) by &n positions
 	macro
 	ROTL4	&loc,&n
 	aif	&n>16,.dorotr2
         lda     &loc
+	lcla	&i
+&i	seta	&n
+.rotlloop2
+        asl     a		;to set carry
+        rol     &loc+2
+        rol     &loc
+&i	seta	&i-1
+	aif	&i>0,.rotlloop2
+	ago	.end2
+.dorotr2
+	ROTR4	&loc,32-&n
+.end2
+	mend
+
+* Expects the contents of &loc to be loaded in A already
+	macro
+	ROTL4CONT &loc,&n
+	aif	&n>16,.dorotr2
 	lcla	&i
 &i	seta	&n
 .rotlloop2
@@ -229,8 +265,6 @@
 ; compute the rest of the message schedule (W_16 to W_63)
 &i	seta	(&part-1)*16
 .loop2
-	lda_w	&i-15,1
-	sta	temp1
 	lda_w	&i-15,-1
 	and	#$FF00
 	sta	temp1+2
@@ -238,12 +272,14 @@
 	and	#$00FF
 	ora	temp1+2
 	sta	temp1+2
-	ROTL4	temp1,1
-	lda_w	&i-15
-	sta	temp2+2
+	lda_w	&i-15,1
+	sta	temp1
+	ROTL4CONT temp1,1
 	lda_w	&i-15,2
 	sta	temp2
-	ROTR4	temp2,2
+	lda_w	&i-15
+	sta	temp2+2
+	ROTR4CONT temp2,2
 	ROTR4MOVE_w temp3,&i-15,3
 	lda	temp3
 	eor	temp2
@@ -255,14 +291,12 @@
 	eor	temp1+2
 	sta	temp1+2
 	
-	lda_w	&i-2
-	sta	temp2+2
 	lda_w	&i-2,2
 	sta	temp2
-	ROTR4	temp2,1
+	lda_w	&i-2
+	sta	temp2+2
+	ROTR4CONT temp2,1
 	ROTR4MOVE temp3,temp2,2
-	lda	temp2+1
-	sta	temp4+2
 	lda	temp2-1
 	and	#$FF00
 	sta	temp4
@@ -270,7 +304,9 @@
 	and	#$00FF
 	ora	temp4
 	sta	temp4
-	ROTR4	temp4,1
+	lda	temp2+1
+	sta	temp4+2
+	ROTR4CONT temp4,1
 	lda	temp4
 	eor	temp3
 	eor	temp2
@@ -317,8 +353,6 @@
 	BlockLoopIter &a,&b,&c,&d,&e,&f,&g,&h,&iter
 	
 ; Sigma_1 computation
-	lda	&e+1
-	sta	temp1
 	lda	&e-1
 	and	#$FF00
 	sta	temp1+2
@@ -326,10 +360,10 @@
 	and	#$00FF
 	ora	temp1+2
 	sta	temp1+2
-	ROTL4	temp1,2
-	ROTR4MOVE temp2,temp1,5
 	lda	&e+1
-	sta	temp3+2
+	sta	temp1
+	ROTL4CONT temp1,2
+	ROTR4MOVE temp2,temp1,5
 	lda	&e-1
 	and	#$FF00
 	sta	temp3
@@ -337,7 +371,9 @@
 	and	#$00FF
 	ora	temp3
 	sta	temp3
-	ROTR4	temp3,1
+	lda	&e+1
+	sta	temp3+2
+	ROTR4CONT temp3,1
 	lda	temp1
 	eor	temp2
 	eor	temp3
@@ -400,7 +436,7 @@
 	sta	temp3+2
 	lda	&a+2
 	sta	temp3
-	ROTL4	temp3,3
+	ROTL4CONT temp3,3
 	ROTR4MOVE temp4,&a,22
 	lda	temp2
 	eor	temp3
