@@ -265,6 +265,7 @@
 ; compute the rest of the message schedule (W_16 to W_63)
 &i	seta	(&part-1)*16
 .loop2
+; sigma_0 + w[i-16] computation
 	lda_w	&i-15,-1
 	and	#$FF00
 	sta	temp1+2
@@ -293,12 +294,16 @@
 	ror	a
 	eor	temp2
 	eor	temp1
+	clc
+	adc_w	&i-16
 	sta	temp1
 	lda	temp3+2
 	eor	temp2+2
 	eor	temp1+2
+	adc_w	&i-16,2
 	sta	temp1+2
 	
+; sigma_1 + w[i-7] computation
 	lda_w	&i-2,2
 	sta	temp2
 	lda_w	&i-2
@@ -308,44 +313,33 @@
 	lda_w	&i-2,3
 	and	#$00FF
 	lsr	a
-	tay
+	tax
 	lda_w	&i-2,1
 	ror	a
-	tax
-	tya
-	lsr	a
 	tay
 	txa
+	lsr	a
+	tax
+	tya
 	ror	a
 	eor	temp3
 	eor	temp2
-	sta	temp2
-	tya
+	clc
+	adc_w	&i-7
+	tay
+	txa
 	and	#$003F
 	eor	temp3+2
 	eor	temp2+2
-	sta	temp2+2
-	
-	clc
-	lda_w	&i-16
-	adc_w	&i-7
-	tay
-	lda_w	&i-16,2
 	adc_w	&i-7,2
 	tax
+	
 	clc
 	tya
 	adc	temp1
-	tay
-	txa
-	adc	temp1+2
-	tax
-	clc
-	tya
-	adc	temp2
 	sta_w	&i
 	txa
-	adc	temp2+2
+	adc	temp1+2
 	sta_w	&i,2
 	
 &i	seta	&i+1
@@ -361,7 +355,10 @@
 	macro
 	BlockLoopIter &a,&b,&c,&d,&e,&f,&g,&h,&iter
 	
-; Sigma_1 computation
+; Sigma_1+w[i] computation
+	lda	&e+1
+	sta	temp1
+	sta	temp2
 	lda	&e-1
 	and	#$FF00
 	sta	temp1+2
@@ -369,9 +366,8 @@
 	and	#$00FF
 	ora	temp1+2
 	sta	temp1+2
-	lda	&e+1
-	sta	temp1
-	ROTR4MOVE temp2,temp1,3
+	sta	temp2+2
+	ROTR4CONT temp2,3
 	ROTL4	temp1,2
 	lda	&e-1
 	and	#$FF00
@@ -386,60 +382,63 @@
 	lda	temp1
 	eor	temp2
 	eor	temp3
+	clc
+	ldx	idx
+	adc	w+&iter*4,x
 	sta	temp1
 	lda	temp1+2
 	eor	temp2+2
 	eor	temp3+2
+	adc	w+&iter*4+2,x
 	sta	temp1+2
 
-; ch computation
+; ch+Sigma_1+W[i] computation
 	lda	&f
 	eor	&g
 	and	&e
 	eor	&g
+	clc
+	adc	temp1
 	sta	temp2
 	lda	&f+2
 	eor	&g+2
 	and	&e+2
 	eor	&g+2
+	adc	temp1+2
 	sta	temp2+2
 	
 ; T_1 computation
 	clc
-	ldx	idx
-	lda	w+&iter*4,x
-	adc	&h
-	tay
-	lda	w+&iter*4+2,x
-	adc	&h+2
-	tax
-	clc
-	tya
-	adc	temp1
-	tay
-	txa
-	adc	temp1+2
-	tax
-	clc
-	tya
+	lda	&h
 	adc	temp2
 	tay
-	txa
+	lda	&h+2
 	adc	temp2+2
 	tax
 	clc
 	tya
-	adc	(k_ptr)
+	ldy	k_ptr
+	adc	(zero),y
 	sta	temp1
 	txa
-	inc	k_ptr
-	inc	k_ptr
-	adc	(k_ptr)
+	iny
+	iny
+	adc	(zero),y
 	sta	temp1+2
-	inc	k_ptr
-	inc	k_ptr
+	tax
+	iny
+	iny
+	sty	k_ptr
 	
-;Sigma_0 computation
+	clc
+	lda	temp1
+	adc	&d
+	sta	&d
+	txa
+	adc	&d+2
+	sta	&d+2
+	
+;Sigma_0+T_1 computation
 	ROTR4MOVE temp2,&a,2
 	lda	&a
 	sta	temp3+2
@@ -459,13 +458,16 @@
 	lda	temp2
 	eor	temp3
 	eor	temp4
+	clc
+	adc	temp1
 	sta	temp2
 	lda	temp2+2
 	eor	temp3+2
 	eor	temp4+2
+	adc	temp1+2
 	sta	temp2+2
 
-;maj computation
+;maj and T_2 computation (saved to &h)
 	lda	&a
 	ora	&b
 	and	&c
@@ -473,7 +475,9 @@
 	lda	&a
 	and	&b
 	ora	temp3
-	sta	temp3
+	clc
+	adc	temp2
+	sta	&h
 	lda	&a+2
 	ora	&b+2
 	and	&c+2
@@ -481,30 +485,6 @@
 	lda	&a+2
 	and	&b+2
 	ora	temp3+2
-	sta	temp3+2
-
-;T_2 computation
-	clc
-	lda	temp2
-	adc	temp3
-	sta	temp2
-	lda	temp2+2
-	adc	temp3+2
-	sta	temp2+2
-	
-	clc
-	lda	&d
-	adc	temp1
-	sta	&d
-	lda	&d+2
-	adc	temp1+2
-	sta	&d+2
-	
-	clc
-	lda	temp1
-	adc	temp2
-	sta	&h
-	lda	temp1+2
 	adc	temp2+2
 	sta	&h+2
 	

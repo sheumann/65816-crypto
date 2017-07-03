@@ -49,7 +49,7 @@ w	gequ	92
 temp3	gequ	156
 temp4	gequ	160
 k_ptr	gequ	164
-
+zero	gequ	168
 
 k private
 	dc i4'$428a2f98, $71374491, $b5c0fbcf, $e9b5dba5'
@@ -115,6 +115,8 @@ SHA256_INIT start
 	stz	length+4
 	stz	length+6
 	stz	extra
+	
+	stz	zero
 	rtl
 	end
 
