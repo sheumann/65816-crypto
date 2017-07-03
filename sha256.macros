@@ -230,7 +230,11 @@
 &i	seta	(&part-1)*16
 .loop2
 	ROTR4MOVE_w temp1,&i-15,7
-	ROTR4MOVE_w temp2,&i-15,18
+	lda_w	&i-15
+	sta	temp2+2
+	lda_w	&i-15,2
+	sta	temp2
+	ROTR4	temp2,2
 	ROTR4MOVE_w temp3,&i-15,3
 	lda	temp3
 	eor	temp2
@@ -242,9 +246,13 @@
 	eor	temp1+2
 	sta	temp1+2
 	
-	ROTR4MOVE_w temp2,&i-2,17
-	ROTR4MOVE_w temp3,&i-2,19
-	ROTR4MOVE_w temp4,&i-2,10
+	lda_w	&i-2
+	sta	temp2+2
+	lda_w	&i-2,2
+	sta	temp2
+	ROTR4	temp2,1
+	ROTR4MOVE temp3,temp2,2
+	ROTL4MOVE temp4,temp2,7
 	lda	temp4
 	eor	temp3
 	eor	temp2
@@ -292,7 +300,7 @@
 	
 ; Sigma_1 computation
 	ROTR4MOVE temp1,&e,6
-	ROTR4MOVE temp2,&e,11
+	ROTR4MOVE temp2,temp1,5
 	ROTR4MOVE temp3,&e,25
 	lda	temp1
 	eor	temp2
@@ -352,7 +360,11 @@
 	
 ;Sigma_0 computation
 	ROTR4MOVE temp2,&a,2
-	ROTR4MOVE temp3,&a,13
+	lda	&a
+	sta	temp3+2
+	lda	&a+2
+	sta	temp3
+	ROTL4	temp3,3
 	ROTR4MOVE temp4,&a,22
 	lda	temp2
 	eor	temp3
