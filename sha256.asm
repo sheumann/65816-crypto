@@ -174,13 +174,10 @@ SHA256_PROCESSBLOCK start
 	lda	#k
 	sta	k_ptr
 	ComputeSchedule 1
-	BlockLoopPart 1
-	jsr	ComputeScheduleSub
-	BlockLoopPart 2
-	jsr	ComputeScheduleSub
-	BlockLoopPart 3
-	jsr	ComputeScheduleSub
-	BlockLoopPart 4
+	jsr	BlockLoopSub
+	jsr	ScheduleAndBlockLoopSub
+	jsr	ScheduleAndBlockLoopSub
+	jsr	ScheduleAndBlockLoopSub
 
 endloop clc
 	lda	h0
@@ -247,7 +244,9 @@ endloop clc
 	sta	h7+2	
 	rtl
 
-ComputeScheduleSub anop
+ScheduleAndBlockLoopSub anop
 	ComputeSchedule 2
+BlockLoopSub anop
+	BlockLoopPart 1
 	rts
 	end
