@@ -68,7 +68,7 @@
 &i	seta	&i-1
 	aif	&i>0,.rotrloop3
 	ago	.end3
-dorotl3
+.dorotl3
 	ROTL4MOVE &to,&from,32-&n
 .end3
 	mend
@@ -225,7 +225,7 @@ dorotl3
 
 
 * One iteration of the loop for processing blocks.
-* The a,b,c,d,e variables are given as parameters so we can aviod cycling them.
+* The a,b,c,d,e variables are given as parameters so we can avoid cycling them.
 	macro
 	BlockLoopIter &a,&b,&c,&d,&e,&iter
 
@@ -336,7 +336,7 @@ dorotl3
 	macro
 	BlockLoopPart &part
 
-	stz	idx	
+	stz	idx
 loop&part anop
 	
 	BlockLoopIter a_,b,c,d,e,0
