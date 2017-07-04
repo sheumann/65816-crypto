@@ -26,9 +26,10 @@ a_	gequ	12	; elements of state
 b	gequ	16
 c	gequ	20
 d	gequ	24
-temp2	gequ	28
-;unused gequ	32
-temp	gequ	36
+zero1	gequ	28
+temp	gequ	30
+zero2	gequ	34
+;unused	gequ	36
 h0	gequ	40
 h1	gequ	44
 h2	gequ	48
@@ -96,6 +97,9 @@ MD5_INIT start
 	stz	length+4
 	stz	length+6
 	stz	extra
+	
+	stz	zero1
+	stz	zero2
 	rtl
 	end
 

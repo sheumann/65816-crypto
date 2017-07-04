@@ -141,11 +141,7 @@
 	aif	&n>7,.skip2
 	ldx	&loc+1
 	lda	&loc+3
-	and	#$00FF
-	sta	temp2
-	lda	&loc-1
-	and	#$FF00
-	ora	temp2
+	ora	&loc-1
 	sta	&loc
 	stx	&loc+2
 	txa
@@ -155,11 +151,7 @@
 	aif	&n>11,.skip3
 	ldx	&loc+1
 	lda	&loc+3
-	and	#$00FF
-	sta	temp2
-	lda	&loc-1
-	and	#$FF00
-	ora	temp2
+	ora	&loc-1
 	sta	&loc
 	stx	&loc+2
 	ROTL4CONT &loc,&n-8
@@ -180,7 +172,7 @@
 	sty	&loc
 	mexit
 .skip5
-	aif	&n>21,.skip6
+	aif	&n>20,.skip6
 	lda	&loc+2
 	ldy	&loc
 	sta	&loc
@@ -190,11 +182,7 @@
 .skip6
 	ldx	&loc+1
 	lda	&loc+3
-	and	#$00FF
-	sta	temp2
-	lda	&loc-1
-	and	#$FF00
-	ora	temp2
+	ora	&loc-1
 	sta	&loc+2
 	stx	&loc
 	ROTR4CONT &loc,24-&n
