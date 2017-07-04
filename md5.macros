@@ -134,7 +134,7 @@
 * Left-rotate with various optimizations applied
 	macro
 	ROTL4AUTO &loc,&n,&haveLocPlus2
-	aif	&n>5,.skip1
+	aif	&n>4,.skip1
 	ROTL4	&loc,&n
 	mexit
 .skip1
