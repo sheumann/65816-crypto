@@ -131,14 +131,14 @@
 	eor	&d
 	clc
 	adc	&a
-	sta	f_plus_a
+	sta	temp
 	
 	lda	&c+2
 	eor	&d+2
 	and	&b+2
 	eor	&d+2
 	adc	&a+2
-	sta	f_plus_a+2
+	sta	temp+2
 .skip1
 
 * f_16 to f_31
@@ -149,14 +149,14 @@
 	eor	&c
 	clc
 	adc	&a
-	sta	f_plus_a
+	sta	temp
 	
 	lda	&b+2
 	eor	&c+2
 	and	&d+2
 	eor	&c+2
 	adc	&a+2
-	sta	f_plus_a+2
+	sta	temp+2
 .skip2
 
 * f_32 to f_47
@@ -166,13 +166,13 @@
 	eor	&d
 	clc
 	adc	&a
-	sta	f_plus_a
+	sta	temp
 	
 	lda	&b+2
 	eor	&c+2
 	eor	&d+2
 	adc	&a+2
-	sta	f_plus_a+2
+	sta	temp+2
 .skip3
 
 * f_48 to f_63
@@ -183,27 +183,27 @@
 	eor	&c
 	clc
 	adc	&a
-	sta	f_plus_a
+	sta	temp
 	
 	lda	&d+2
 	eor	#$FFFF
 	ora	&b+2
 	eor	&c+2
 	adc	&a+2
-	sta	f_plus_a+2
+	sta	temp+2
 .skip4
 
 	ldy	idx
 	ldx	g_times_4,y
 	lda	m,x
 	clc
-	adc	f_plus_a
+	adc	temp
 	sta	temp
 	inx
 	inx
 	lda	m,x
-	adc	f_plus_a+2
-	sta	temp+2
+	adc	temp+2
+	tax
 	
 	lda	k,y
 	clc
@@ -211,9 +211,13 @@
 	sta	temp
 	iny
 	iny
-	lda	k,y
-	adc	temp+2
+	txa
+	adc	k,y
 	sta	temp+2
+	
+	iny
+	iny
+	sty	idx
 	
 	ROTL4	temp,&shift
 	
@@ -224,11 +228,6 @@
 	lda	&b+2
 	adc	temp+2
 	sta	&a+2
-	
-	inc	idx
-	inc	idx
-	inc	idx
-	inc	idx
 	
 	mend
 

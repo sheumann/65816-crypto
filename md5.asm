@@ -27,7 +27,7 @@ b	gequ	16
 c	gequ	20
 d	gequ	24
 ;unused	gequ	28
-f_plus_a gequ	32
+;unused gequ	32
 temp	gequ	36
 h0	gequ	40
 h1	gequ	44
