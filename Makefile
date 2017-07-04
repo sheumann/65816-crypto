@@ -1,6 +1,6 @@
 CFLAGS = -O255 -w255
 
-PROGRAMS = aescbctest aesctrtest aestest aescrypt sha1sum sha1test
+PROGRAMS = aescbctest aesctrtest aestest aescrypt sha1sum sha1test sha256sum sha256test
 
 .PHONY: default
 default: $(PROGRAMS)
@@ -22,6 +22,12 @@ sha1sum: sha1sum.c sha1.cc sha1.asm sha1.macros sha1.h
 
 sha1test: sha1test.c sha1.cc sha1.asm sha1.macros sha1.h
 	occ $(CFLAGS) sha1test.c sha1.cc -o sha1test
+
+sha256sum: sha256sum.c sha256.cc sha256.asm sha256.macros sha256.h
+	occ $(CFLAGS) sha256sum.c sha256.cc -o sha256sum
+
+sha256test: sha256test.c sha256.cc sha256.asm sha256.macros sha256.h
+	occ $(CFLAGS) sha256test.c sha256.cc -o sha256test
 
 .PHONY: clean
 clean:
