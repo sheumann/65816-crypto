@@ -328,7 +328,6 @@
 	adc_w	&i-7
 	tay
 	txa
-	and	#$003F
 	eor	temp3+2
 	eor	temp2+2
 	adc_w	&i-7,2
