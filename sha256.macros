@@ -170,21 +170,6 @@
 	mend
 
 	macro
-&lab	eor_w	&i,&inc
-	lcla	&j
-&j	seta	&i
-.modloop2
-	aif	&j<16,.goodidx2
-&j	seta	&j-16
-	ago	.modloop2
-.goodidx2
-	aif	C:&inc<>0,.haveinc2
-	lcla	&inc
-.haveinc2
-&lab	eor	w+(&j)*4+&inc
-	mend
-
-	macro
 &lab	sta_w	&i,&inc
 	lcla	&j
 &j	seta	&i
@@ -214,33 +199,6 @@
 &lab	adc	w+(&j)*4+&inc
 	mend
 
-	macro
-	ROTR4MOVE_w &to,&from,&n
-	lcla	&j
-&j	seta	&from
-.modloop5
-	aif	&j<16,.goodidx5
-&j	seta	&j-16
-	ago	.modloop5
-.goodidx5
-	aif	&n>16,.dorotl4
-        lda     w+(&j)*4
-        sta     &to
-        lda     w+(&j)*4+2
-        sta     &to+2
-	lcla	&i
-&i	seta	&n
-.rotrloop4
-	lsr	a		;to set carry
-	ror     &to
-	ror     &to+2
-&i	seta	&i-1
-	aif	&i>0,.rotrloop4
-	ago	.end4
-.dorotl4
-	ROTL4MOVE &to,w+(&j)*4,32-&n
-.end4
-	mend
 
 * Compute one part of the message schedule (16 elements)
 	macro
