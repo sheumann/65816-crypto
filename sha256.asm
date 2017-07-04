@@ -24,19 +24,23 @@
 * Direct page locations	
 length	gequ	0
 extra	gequ	8
-idx	gequ	10
+zero	gequ	10
 a_	gequ	12	; elements of state
-b	gequ	16
-c	gequ	20
-d	gequ	24
-e	gequ	28
-f	gequ	32
-g	gequ	36
-h	gequ	40
-temp1	gequ	44
-temp2	gequ	48
-ch	gequ	52
-maj	gequ	56
+zero2	gequ	16
+b	gequ	18
+zero3	gequ	22
+c	gequ	24
+zero4	gequ	28
+d	gequ	30
+zero5	gequ	34
+e	gequ	36
+zero6	gequ	40
+f	gequ	42
+zero7	gequ	46
+g	gequ	48
+zero8	gequ	52
+h	gequ	54
+zero9	gequ	58
 h0	gequ	60
 h1	gequ	64
 h2	gequ	68
@@ -46,10 +50,10 @@ h5	gequ	80
 h6	gequ	84
 h7	gequ	88
 w	gequ	92
-temp3	gequ	156
-temp4	gequ	160
+ch	gequ	156
+maj	gequ	160
 k_ptr	gequ	164
-zero	gequ	168
+idx	gequ	168
 two	gequ	170
 four	gequ	172
 six	gequ	174
@@ -65,6 +69,10 @@ twentyfour gequ 192
 twentysix gequ	194
 twentyeight gequ 196
 thirty	gequ	198
+temp1	gequ	200
+temp2	gequ	204
+temp3	gequ	208
+temp4	gequ	212
 
 
 k private
@@ -133,6 +141,14 @@ SHA256_INIT start
 	stz	extra
 	
 	stz	zero
+	stz	zero2
+	stz	zero3
+	stz	zero4
+	stz	zero5
+	stz	zero6
+	stz	zero7
+	stz	zero8
+	stz	zero9
 	lda	#2
 	sta	two
 	lda	#4

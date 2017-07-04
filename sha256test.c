@@ -27,7 +27,7 @@ int main(int argc, char **argv) {
     long double bytes_per_sec;
     
     struct sha256_context *context, **context_hndl;
-    struct sha256_context context_init = {0,0,0,0, {0}, {0}, {0},
+    struct sha256_context context_init = {0,0,0, {0}, {0},
         {0x61,0x62,0x63,0x80,
          0x00,0x00,0x00,0x00,
          0x00,0x00,0x00,0x00,
@@ -56,12 +56,6 @@ int main(int argc, char **argv) {
     
     sha256_init(context);
     sha256_processblock(context);
-    
-    printf("a...h = ");
-    for (i = 0; i < 8; i++) {
-        printf("%08lx ", context->vars[i]);
-    }
-    printf("\n");
     
     printf("h[..] = %02x%02x%02x%02x %02x%02x%02x%02x %02x%02x%02x%02x %02x%02x%02x%02x "
            "%02x%02x%02x%02x %02x%02x%02x%02x %02x%02x%02x%02x %02x%02x%02x%02x\n", 

@@ -18,12 +18,10 @@ struct sha256_context {
 	unsigned long length;
 	unsigned long length2;
 	unsigned short extra;
-	unsigned short idx;
-	unsigned long vars[8];
-	unsigned char reserved1[16];
+	unsigned char reserved1[50];
 	unsigned char hash[32];
 	unsigned char block[64];
-	unsigned char reserved2[44];
+	unsigned char reserved2[60];
 };
 
 /*

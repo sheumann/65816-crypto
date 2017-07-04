@@ -359,21 +359,13 @@
 	sta	temp1
 	sta	temp2
 	lda	&e-1
-	and	#$FF00
-	sta	temp1+2
-	lda	&e+3
-	and	#$00FF
-	ora	temp1+2
+	ora	&e+3
 	sta	temp1+2
 	sta	temp2+2
 	ROTR4CONT temp2,3
 	ROTL4	temp1,2
 	lda	&e-1
-	and	#$FF00
-	sta	temp3
-	lda	&e+3
-	and	#$00FF
-	ora	temp3
+	ora	&e+3
 	sta	temp3
 	lda	&e+1
 	sta	temp3+2
@@ -442,11 +434,7 @@
 	lda	&a+1
 	sta	temp4+2
 	lda	&a-1
-	and	#$FF00
-	sta	temp4
-	lda	&a+3
-	and	#$00FF
-	ora	temp4
+	ora	&a+3
 	sta	temp4
 	ROTL4CONT temp4,2
 	lda	temp2
