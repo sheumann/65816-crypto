@@ -57,7 +57,8 @@ int main(int argc, char **argv) {
     sha256_init(context);
     sha256_processblock(context);
     
-    printf("h[..] = %02x%02x%02x%02x %02x%02x%02x%02x %02x%02x%02x%02x %02x%02x%02x%02x "
+    
+    printf("SHA-256:%02x%02x%02x%02x %02x%02x%02x%02x %02x%02x%02x%02x %02x%02x%02x%02x "
            "%02x%02x%02x%02x %02x%02x%02x%02x %02x%02x%02x%02x %02x%02x%02x%02x\n", 
            context->hash[3], context->hash[2], context->hash[1], context->hash[0], 
            context->hash[7], context->hash[6], context->hash[5], context->hash[4], 
@@ -67,6 +68,23 @@ int main(int argc, char **argv) {
            context->hash[23], context->hash[22], context->hash[21], context->hash[20],
            context->hash[27], context->hash[26], context->hash[25], context->hash[24],
            context->hash[31], context->hash[30], context->hash[29], context->hash[28]);
+
+    *context = context_init;
+    
+    sha224_init(context);
+    sha256_processblock(context);
+    
+    
+    printf("SHA-224:%02x%02x%02x%02x %02x%02x%02x%02x %02x%02x%02x%02x %02x%02x%02x%02x "
+           "%02x%02x%02x%02x %02x%02x%02x%02x %02x%02x%02x%02x\n", 
+           context->hash[3], context->hash[2], context->hash[1], context->hash[0], 
+           context->hash[7], context->hash[6], context->hash[5], context->hash[4], 
+           context->hash[11], context->hash[10], context->hash[9], context->hash[8], 
+           context->hash[15], context->hash[14], context->hash[13], context->hash[12], 
+           context->hash[19], context->hash[18], context->hash[17], context->hash[16],
+           context->hash[23], context->hash[22], context->hash[21], context->hash[20],
+           context->hash[27], context->hash[26], context->hash[25], context->hash[24]);
+
 
     tick_count = GetTick();
     for (i = 0; i < 1000; i++) {

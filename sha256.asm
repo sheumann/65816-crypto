@@ -94,13 +94,56 @@ k private
 	dc i4'$90befffa, $a4506ceb, $bef9a3f7, $c67178f2'
 	end
 
-* Initialize a SHA-256 context.
-* This must be called before any of the other SHA-256 functions.
+* Initialize a context for SHA-256 computation.
+* An init function must be called before any of the other SHA-256 functions.
 sha256_init start
 	CFunction SHA256_INIT
 	end
 
-SHA256_INIT start
+* Initialize a context for SHA-224 computation.
+* To compute a SHA-224 hash, call this function, and then call the below
+* functions as if computing a SHA-256 hash. After calling sha256_finalize,
+* the first 28 bytes of context->hash will contain the SHA-224 hash.
+sha224_init start
+	CFunction SHA224_INIT
+	end
+
+SHA224_INIT start
+	lda	#$9ed8
+	sta	h0
+	lda	#$c105
+	sta	h0+2
+	lda	#$d507
+	sta	h1
+	lda	#$367c
+	sta	h1+2
+	lda	#$dd17
+	sta	h2
+	lda	#$3070
+	sta	h2+2
+	lda	#$5939
+	sta	h3
+	lda	#$f70e
+	sta	h3+2
+	lda	#$0b31
+	sta	h4
+	lda	#$ffc0
+	sta	h4+2
+	lda	#$1511
+	sta	h5
+	lda	#$6858
+	sta	h5+2
+	lda	#$8fa7
+	sta	h6
+	lda	#$64f9
+	sta	h6+2
+	lda	#$4fa4
+	sta	h7
+	lda	#$befa
+	sta	h7+2
+	bra	initdp
+
+SHA256_INIT entry
 	lda	#$e667
 	sta	h0
 	lda	#$6a09
@@ -133,8 +176,8 @@ SHA256_INIT start
 	sta	h7
 	lda	#$5be0
 	sta	h7+2
-	
-	stz	length
+
+initdp	stz	length
 	stz	length+2
 	stz	length+4
 	stz	length+6

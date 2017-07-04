@@ -29,10 +29,18 @@ struct sha256_context {
  */
 
 /*
- * Initialize a SHA-256 context.
- * This must be called before any of the other SHA-256 functions.
+ * Initialize a context for SHA-256 computation.
+ * An init function must be called before any of the other SHA-256 functions.
  */
 void sha256_init(struct sha256_context *context);
+
+/*
+ * Initialize a context for SHA-224 computation.
+ * To compute a SHA-224 hash, call this function, and then call the below
+ * functions as if computing a SHA-256 hash. After calling sha256_finalize,
+ * the first 28 bytes of context->hash will contain the SHA-224 hash.
+ */
+void sha224_init(struct sha256_context *context);
 
 /*
  * Update a SHA-256 context based on the specified data.
