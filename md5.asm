@@ -26,7 +26,7 @@ a_	gequ	12	; elements of state
 b	gequ	16
 c	gequ	20
 d	gequ	24
-;unused	gequ	28
+temp2	gequ	28
 ;unused gequ	32
 temp	gequ	36
 h0	gequ	40

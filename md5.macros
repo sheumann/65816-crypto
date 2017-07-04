@@ -32,11 +32,47 @@
 .end
 	mend
 
+* Expects the contents of &loc+2 to be loaded in A already
+	macro
+	ROTR4CONT &loc,&n
+	aif	&n>16,.dorotl
+	lcla	&i
+&i	seta	&n
+.rotrloop
+	lsr	a		;to set carry
+	ror     &loc
+	ror     &loc+2
+&i	seta	&i-1
+	aif	&i>0,.rotrloop
+	ago	.end
+.dorotl
+	ROTL4	&loc,32-&n
+.end
+	mend
+
 * Left-rotate 32-bit value in &loc (DP or 16-bit address) by &n positions
 	macro
 	ROTL4	&loc,&n
 	aif	&n>16,.dorotr2
         lda     &loc
+	lcla	&i
+&i	seta	&n
+.rotlloop2
+        asl     a		;to set carry
+        rol     &loc+2
+        rol     &loc
+&i	seta	&i-1
+	aif	&i>0,.rotlloop2
+	ago	.end2
+.dorotr2
+	ROTR4	&loc,32-&n
+.end2
+	mend
+
+* Expects the contents of &loc to be loaded in A already
+	macro
+	ROTL4CONT &loc,&n
+	aif	&n>16,.dorotr2
 	lcla	&i
 &i	seta	&n
 .rotlloop2
@@ -93,6 +129,75 @@
 .dorotr4
 	ROTR4MOVE &to,&from,32-&n
 .end4
+	mend
+
+* Left-rotate with various optimizations applied
+	macro
+	ROTL4AUTO &loc,&n
+	aif	&n>5,.skip1
+	ROTL4	&loc,&n
+	mexit
+.skip1
+	aif	&n>7,.skip2
+	ldx	&loc+1
+	lda	&loc+3
+	and	#$00FF
+	sta	temp2
+	lda	&loc-1
+	and	#$FF00
+	ora	temp2
+	sta	&loc
+	stx	&loc+2
+	txa
+	ROTR4CONT &loc,8-&n
+	mexit
+.skip2
+	aif	&n>11,.skip3
+	ldx	&loc+1
+	lda	&loc+3
+	and	#$00FF
+	sta	temp2
+	lda	&loc-1
+	and	#$FF00
+	ora	temp2
+	sta	&loc
+	stx	&loc+2
+	ROTL4CONT &loc,&n-8
+	mexit
+.skip3
+	aif	&n>15,.skip4
+	lda	&loc
+	ldy	&loc+2
+	sta	&loc+2
+	sty	&loc
+	ROTR4CONT &loc,16-&n
+	mexit
+.skip4
+	aif	&n>16,.skip5
+	lda	&loc
+	ldy	&loc+2
+	sta	&loc+2
+	sty	&loc
+	mexit
+.skip5
+	aif	&n>21,.skip6
+	lda	&loc+2
+	ldy	&loc
+	sta	&loc
+	sty	&loc+2
+	ROTL4CONT &loc,&n-16
+	mexit
+.skip6
+	ldx	&loc+1
+	lda	&loc+3
+	and	#$00FF
+	sta	temp2
+	lda	&loc-1
+	and	#$FF00
+	ora	temp2
+	sta	&loc+2
+	stx	&loc
+	ROTR4CONT &loc,24-&n
 	mend
 
 
@@ -219,7 +324,7 @@
 	iny
 	sty	idx
 	
-	ROTL4	temp,&shift
+	ROTL4AUTO temp,&shift
 	
 	clc
 	lda	&b
