@@ -133,7 +133,7 @@
 
 * Left-rotate with various optimizations applied
 	macro
-	ROTL4AUTO &loc,&n
+	ROTL4AUTO &loc,&n,&haveLocPlus2
 	aif	&n>5,.skip1
 	ROTL4	&loc,&n
 	mexit
@@ -158,22 +158,31 @@
 	mexit
 .skip3
 	aif	&n>15,.skip4
-	lda	&loc
+	aif	C:&haveLocPlus2>0,.noload1
 	ldy	&loc+2
+	ago	.didload1
+.noload1
+	tay
+.didload1
+	lda	&loc
 	sta	&loc+2
 	sty	&loc
 	ROTR4CONT &loc,16-&n
 	mexit
 .skip4
 	aif	&n>16,.skip5
-	lda	&loc
-	ldy	&loc+2
-	sta	&loc+2
-	sty	&loc
+	aif	C:&haveLocPlus2>0,.noload2
+	lda	&loc+2
+.noload2
+	ldy	&loc
+	sta	&loc
+	sty	&loc+2
 	mexit
 .skip5
 	aif	&n>20,.skip6
+	aif	C:&haveLocPlus2>0,.noload2
 	lda	&loc+2
+.noload2
 	ldy	&loc
 	sta	&loc
 	sty	&loc+2
@@ -312,7 +321,7 @@
 	iny
 	sty	idx
 	
-	ROTL4AUTO temp,&shift
+	ROTL4AUTO temp,&shift,1
 	
 	clc
 	lda	&b
