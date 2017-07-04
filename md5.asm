@@ -39,6 +39,7 @@ m	gequ	60
 
 
 * Precomputed values of g*4 for each loop iteration, for indexing the message
+	align	256
 g_times_4 private
 	dc i4' 0,  4,  8, 12, 16, 20, 24, 28, 32, 36, 40, 44, 48, 52, 56, 60'
 	dc i4' 4, 24, 44,  0, 20, 40, 60, 16, 36, 56, 12, 32, 52,  8, 28, 48'
@@ -46,6 +47,7 @@ g_times_4 private
 	dc i4' 0, 28, 56, 20, 48, 12, 40,  4, 32, 60, 24, 52, 16, 44,  8, 36'
 	end
 
+	align	256
 k	private
 	dc i4'$d76aa478, $e8c7b756, $242070db, $c1bdceee'
 	dc i4'$f57c0faf, $4787c62a, $a8304613, $fd469501'

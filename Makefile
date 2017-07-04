@@ -6,17 +6,17 @@ PROGRAMS = aescbctest aesctrtest aestest aescrypt sha1sum sha1test \
 .PHONY: default
 default: $(PROGRAMS)
 
-aescbctest: aesalign.asm aescbctest.c aesmodes.c aes.asm aes.macros aes.h
-	occ $(CFLAGS) aesalign.asm aescbctest.c aesmodes.c aes.asm -o aescbctest
+aescbctest: pagealign.asm aescbctest.c aesmodes.c aes.asm aes.macros aes.h
+	occ $(CFLAGS) pagealign.asm aescbctest.c aesmodes.c aes.asm -o aescbctest
 
-aesctrtest: aesalign.asm aesctrtest.c aesmodes.c aes.asm aes.macros aes.h
-	occ $(CFLAGS) aesalign.asm aesctrtest.c aesmodes.c aes.asm -o aesctrtest
+aesctrtest: pagealign.asm aesctrtest.c aesmodes.c aes.asm aes.macros aes.h
+	occ $(CFLAGS) pagealign.asm aesctrtest.c aesmodes.c aes.asm -o aesctrtest
 
-aestest: aesalign.asm aestest.c aes.asm aes.macros aes.h
-	occ $(CFLAGS) aesalign.asm aestest.c aes.asm -o aestest
+aestest: pagealign.asm aestest.c aes.asm aes.macros aes.h
+	occ $(CFLAGS) pagealign.asm aestest.c aes.asm -o aestest
 
-aescrypt: aesalign.asm aescrypt.c aesmodes.c aes.asm aes.macros aes.h
-	occ $(CFLAGS) aesalign.asm aescrypt.c aesmodes.c aes.asm -o aescrypt
+aescrypt: pagealign.asm aescrypt.c aesmodes.c aes.asm aes.macros aes.h
+	occ $(CFLAGS) pagealign.asm aescrypt.c aesmodes.c aes.asm -o aescrypt
 
 sha1sum: sha1sum.c sha1.cc sha1.asm sha1.macros sha1.h
 	occ $(CFLAGS) sha1sum.c sha1.cc -o sha1sum
@@ -30,11 +30,11 @@ sha256sum: sha256sum.c sha256.cc sha256.asm sha256.macros sha256.h
 sha256test: sha256test.c sha256.cc sha256.asm sha256.macros sha256.h
 	occ $(CFLAGS) sha256test.c sha256.cc -o sha256test
 
-md5sum: md5sum.c md5.cc md5.asm md5.macros md5.h
-	occ $(CFLAGS) md5sum.c md5.cc -o md5sum
+md5sum: pagealign.asm md5sum.c md5.cc md5.asm md5.macros md5.h
+	occ $(CFLAGS) pagealign.asm md5sum.c md5.cc -o md5sum
 
-md5test: md5test.c md5.cc md5.asm md5.macros md5.h
-	occ $(CFLAGS) md5test.c md5.cc -o md5test
+md5test: pagealign.asm md5test.c md5.cc md5.asm md5.macros md5.h
+	occ $(CFLAGS) pagealign.asm md5test.c md5.cc -o md5test
 
 .PHONY: clean
 clean:
