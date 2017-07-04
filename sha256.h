@@ -23,7 +23,7 @@ struct sha256_context {
 	unsigned char reserved1[16];
 	unsigned char hash[32];
 	unsigned char block[64];
-	unsigned char reserved2[16];
+	unsigned char reserved2[44];
 };
 
 /*

@@ -50,6 +50,22 @@ temp3	gequ	156
 temp4	gequ	160
 k_ptr	gequ	164
 zero	gequ	168
+two	gequ	170
+four	gequ	172
+six	gequ	174
+eight	gequ	176
+ten	gequ	178
+twelve	gequ	180
+fourteen gequ	182
+sixteen	gequ	184
+eighteen gequ	186
+twenty	gequ	188
+twentytwo gequ	190
+twentyfour gequ 192
+twentysix gequ	194
+twentyeight gequ 196
+thirty	gequ	198
+
 
 k private
 	dc i4'$428a2f98, $71374491, $b5c0fbcf, $e9b5dba5'
@@ -117,6 +133,37 @@ SHA256_INIT start
 	stz	extra
 	
 	stz	zero
+	lda	#2
+	sta	two
+	lda	#4
+	sta	four
+	lda	#6
+	sta	six
+	lda	#8
+	sta	eight
+	lda	#10
+	sta	ten
+	lda	#12
+	sta	twelve
+	lda	#14
+	sta	fourteen
+	lda	#16
+	sta	sixteen
+	lda	#18
+	sta	eighteen
+	lda	#20
+	sta	twenty
+	lda	#22
+	sta	twentytwo
+	lda	#24
+	sta	twentyfour
+	lda	#26
+	sta	twentysix
+	lda	#28
+	sta	twentyeight
+	lda	#30
+	sta	thirty
+	
 	rtl
 	end
 

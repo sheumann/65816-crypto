@@ -353,7 +353,7 @@
 * The a,b,c,d,e,f,g,h variables are given as parameters so we can avoid
 * cycling them.
 	macro
-	BlockLoopIter &a,&b,&c,&d,&e,&f,&g,&h,&iter
+	BlockLoopIter &a,&b,&c,&d,&e,&f,&g,&h,&iter,&k_idx1,&k_idx2
 	
 ; Sigma_1+w[i] computation
 	lda	&e+1
@@ -418,17 +418,12 @@
 	clc
 	tya
 	ldy	k_ptr
-	adc	(zero),y
+	adc	(&k_idx1),y
 	sta	temp1
 	txa
-	iny
-	iny
-	adc	(zero),y
+	adc	(&k_idx2),y
 	sta	temp1+2
 	tax
-	iny
-	iny
-	sty	k_ptr
 	
 	clc
 	lda	temp1
@@ -498,14 +493,19 @@
 	stz	idx
 loop&part anop
 	
-	BlockLoopIter a_,b,c,d,e,f,g,h,0
-	BlockLoopIter h,a_,b,c,d,e,f,g,1
-	BlockLoopIter g,h,a_,b,c,d,e,f,2
-	BlockLoopIter f,g,h,a_,b,c,d,e,3
-	BlockLoopIter e,f,g,h,a_,b,c,d,4
-	BlockLoopIter d,e,f,g,h,a_,b,c,5
-	BlockLoopIter c,d,e,f,g,h,a_,b,6
-	BlockLoopIter b,c,d,e,f,g,h,a_,7
+	BlockLoopIter a_,b,c,d,e,f,g,h,0,zero,two
+	BlockLoopIter h,a_,b,c,d,e,f,g,1,four,six
+	BlockLoopIter g,h,a_,b,c,d,e,f,2,eight,ten
+	BlockLoopIter f,g,h,a_,b,c,d,e,3,twelve,fourteen
+	BlockLoopIter e,f,g,h,a_,b,c,d,4,sixteen,eighteen
+	BlockLoopIter d,e,f,g,h,a_,b,c,5,twenty,twentytwo
+	BlockLoopIter c,d,e,f,g,h,a_,b,6,twentyfour,twentysix
+	BlockLoopIter b,c,d,e,f,g,h,a_,7,twentyeight,thirty
+
+	clc
+	lda	k_ptr
+	adc	#4*8
+	sta	k_ptr
 
 	clc
 	lda	idx
