@@ -94,7 +94,7 @@ int main(int argc, char **argv) {
     
     bytes_per_sec = (long double)1000 * 64 * 60 / tick_count;
     printf("Time for 1000 iters = %lu ticks (%lf bytes/sec)\n", tick_count, bytes_per_sec);
-/*
+
     tick_count = GetTick();
     sha256_init(context);
     sha256_update(context, (void*)0x030000, 64000);
@@ -108,12 +108,16 @@ int main(int argc, char **argv) {
         sha256_update(context, argv[1], strlen(argv[1]));
         sha256_finalize(context);
 
-        printf("h[..] = %02x%02x%02x%02x %02x%02x%02x%02x %02x%02x%02x%02x %02x%02x%02x%02x %02x%02x%02x%02x\n", 
+        printf("h[..] = %02x%02x%02x%02x %02x%02x%02x%02x %02x%02x%02x%02x %02x%02x%02x%02x "
+               "%02x%02x%02x%02x %02x%02x%02x%02x %02x%02x%02x%02x %02x%02x%02x%02x\n", 
                context->hash[0], context->hash[1], context->hash[2], context->hash[3], 
                context->hash[4], context->hash[5], context->hash[6], context->hash[7], 
                context->hash[8], context->hash[9], context->hash[10], context->hash[11], 
                context->hash[12], context->hash[13], context->hash[14], context->hash[15], 
-               context->hash[16], context->hash[17], context->hash[18], context->hash[19]);
+               context->hash[16], context->hash[17], context->hash[18], context->hash[19],
+               context->hash[20], context->hash[21], context->hash[22], context->hash[23], 
+               context->hash[24], context->hash[25], context->hash[26], context->hash[27], 
+               context->hash[28], context->hash[29], context->hash[30], context->hash[31]);
     }
-*/
+
 }
