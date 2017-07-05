@@ -19,7 +19,7 @@
 #include <time.h>
 #include "md5.h"
 
-unsigned char buf[0x8000];
+unsigned char buf[0x8000ul];
 
 int main(int argc, char **argv) {
     struct md5_context ctx;
