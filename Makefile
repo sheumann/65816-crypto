@@ -1,11 +1,13 @@
 CC = occ
 CFLAGS = -O255 -w255
 
+LIBRARIES = lib65816crypto lib65816hash
+
 PROGRAMS = aescbctest aesctrtest aestest aescrypt sha1sum sha1test \
            sha256sum sha256test md5sum md5test
 
 .PHONY: default
-default: $(PROGRAMS)
+default: $(LIBRARIES) $(PROGRAMS)
 
 pagealign.root: pagealign.asm
 	$(CC) -c $<
@@ -21,10 +23,23 @@ aes.a: aes.asm aes.macros
 # Hash algorithms
 sha1.a: sha1.cc sha1.h sha1.asm sha1.macros
 	$(CC) $(CFLAGS) -c $<
+sha1.B: sha1.a
+
 sha256.a: sha256.cc sha1.h sha256.asm sha1.macros
 	$(CC) $(CFLAGS) -c $<
+sha256.B: sha256.a
+
 md5.a: md5.cc md5.h md5.asm md5.macros
 	$(CC) $(CFLAGS) -c $<
+md5.B: md5.a
+
+# Libraries
+lib65816crypto: aesmodes.a aes.a
+	rm -f $@
+	iix makelib -P $@ $(patsubst %,+%,$^)
+lib65816hash: sha1.a sha1.B sha256.a sha256.B md5.a md5.B
+	rm -f $@
+	iix makelib -P $@ $(patsubst %,+%,$^)
 
 # Test programs
 aescbctest.a: aescbctest.c aes.h
@@ -51,31 +66,31 @@ md5sum.a: md5sum.c md5.h
 md5test.a: md5test.c md5.h
 	$(CC) $(CFLAGS) -c $<
 
-aescbctest: pagealign.root aescbctest.a aesmodes.a aes.a
-	$(CC) $(CFLAGS) $^ -o $@
-aesctrtest: pagealign.root aesctrtest.a aesmodes.a aes.a
-	$(CC) $(CFLAGS) $^ -o $@
-aestest: pagealign.root aestest.a aes.a
-	$(CC) $(CFLAGS) $^ -o $@
-aescrypt: pagealign.root aescrypt.a aesmodes.a aes.a
-	$(CC) $(CFLAGS) $^ -o $@
+aescbctest: aescbctest.a pagealign.root lib65816crypto
+	$(CC) $(CFLAGS) pagealign.root $< -L. -llib65816crypto -o $@
+aesctrtest: aesctrtest.a pagealign.root lib65816crypto
+	$(CC) $(CFLAGS) pagealign.root $< -L. -llib65816crypto -o $@
+aestest: aestest.a pagealign.root lib65816crypto
+	$(CC) $(CFLAGS) pagealign.root $< -L. -llib65816crypto -o $@
+aescrypt: aescrypt.a pagealign.root lib65816crypto
+	$(CC) $(CFLAGS) pagealign.root $< -L. -llib65816crypto -o $@
 
-sha1sum: sha1sum.a sha1.a
-	$(CC) $(CFLAGS) $^ -o $@
-sha1test: sha1test.a sha1.a
-	$(CC) $(CFLAGS) $^ -o $@
+sha1sum: sha1sum.a lib65816hash
+	$(CC) $(CFLAGS) $< -L. -llib65816hash -o $@
+sha1test: sha1test.a lib65816hash
+	$(CC) $(CFLAGS) $< -L. -llib65816hash -o $@
 
-sha256sum: sha256sum.a sha256.a
-	$(CC) $(CFLAGS) $^ -o $@
-sha256test: sha256test.a sha256.a
-	$(CC) $(CFLAGS) $^ -o $@
+sha256sum: sha256sum.a lib65816hash
+	$(CC) $(CFLAGS) $< -L. -llib65816hash -o $@
+sha256test: sha256test.a lib65816hash
+	$(CC) $(CFLAGS) $< -L. -llib65816hash -o $@
 
-md5sum: pagealign.root md5sum.a md5.a
-	$(CC) $(CFLAGS) $^ -o $@
-md5test: pagealign.root md5test.a md5.a
-	$(CC) $(CFLAGS) $^ -o $@
+md5sum: md5sum.a pagealign.root lib65816hash
+	$(CC) $(CFLAGS) pagealign.root $< -L. -llib65816hash -o $@
+md5test: md5test.a pagealign.root lib65816hash
+	$(CC) $(CFLAGS) pagealign.root $< -L. -llib65816hash -o $@
 
 
 .PHONY: clean
 clean:
-	rm -f *.a *.A *.b *.B *.root *.ROOT *.o $(PROGRAMS)
+	rm -f *.a *.A *.b *.B *.root *.ROOT *.o $(PROGRAMS) $(LIBRARIES)

@@ -26,6 +26,11 @@
 	case	on
 	mcopy	aes.macros
 
+* Dummy segment to go in .ROOT file
+	align	256
+dummy	private
+	end
+
 * Data tables used for AES encryption and decryption.
 * For best performance, these should be page-aligned.
 	align	256
