@@ -34,43 +34,45 @@ int main(int argc, char **argv) {
     struct concat(HASH_FUNCTION,_context) ctx;
     FILE *file;
     size_t count;
-    int i;
+    int i, n;
 
     srand(time(NULL));
 
-    if (argc != 2) {
-        fprintf(stderr, "Usage: %s filename\n", argv[0]);
+    if (argc < 2) {
+        fprintf(stderr, "Usage: %s filename ...\n", argv[0]);
         return EXIT_FAILURE;
     }
 
-    file = fopen(argv[1], "rb");
-    if (file == NULL) {
-        perror(argv[1]);
-        return EXIT_FAILURE;
-    }
-    
-    concat(HASH_FUNCTION,_init)(&ctx);
-    do {
+    for (n = 1; n < argc; n++) {
+        file = fopen(argv[n], "rb");
+        if (file == NULL) {
+            perror(argv[n]);
+            return EXIT_FAILURE;
+        }
+
+        concat(HASH_FUNCTION,_init)(&ctx);
+        do {
 #ifdef RANDOMIZE_READ_SIZE
-        count = (rand() & 0x7FFF) + 1;
+            count = (rand() & 0x7FFF) + 1;
 #else
-        count = 0x8000ul;
+            count = 0x8000ul;
 #endif
-        count = fread(buf, 1, count, file);
-        concat(HASH_FUNCTION,_update)(&ctx, buf, count);
-    } while (count != 0);
-    
-    if (ferror(file)) {
-        fprintf(stderr, "Error reading file\n");
+            count = fread(buf, 1, count, file);
+            concat(HASH_FUNCTION,_update)(&ctx, buf, count);
+        } while (count != 0);
+
+        if (ferror(file)) {
+            fprintf(stderr, "Error reading file\n");
+        }
+
+        fclose(file);
+        concat(HASH_FUNCTION,_finalize)(&ctx);
+
+        for (i = 0; i < sizeof(ctx.hash); i++) {
+            printf("%02x", ctx.hash[i]);
+        }
+        printf("  %s\n", argv[n]);
     }
-    
-    fclose(file);
-    concat(HASH_FUNCTION,_finalize)(&ctx);
-    
-    for (i = 0; i < sizeof(ctx.hash); i++) {
-        printf("%02x", ctx.hash[i]);
-    }
-    printf("\n");
     
     return 0;
 }
