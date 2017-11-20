@@ -36,7 +36,9 @@ int main(int argc, char **argv) {
     size_t count;
     int i, n;
 
+#ifdef RANDOMIZE_READ_SIZE
     srand(time(NULL));
+#endif
 
     if (argc < 2) {
         fprintf(stderr, "Usage: %s filename ...\n", argv[0]);
