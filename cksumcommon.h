@@ -47,7 +47,11 @@ int main(int argc, char **argv) {
     
     concat(HASH_FUNCTION,_init)(&ctx);
     do {
+#ifdef RANDOMIZE_READ_SIZE
         count = (rand() & 0x7FFF) + 1;
+#else
+        count = 0x8000ul;
+#endif
         count = fread(buf, 1, count, file);
         concat(HASH_FUNCTION,_update)(&ctx, buf, count);
     } while (count != 0);
