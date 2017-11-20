@@ -51,17 +51,17 @@ aestest.a: aestest.c aes.h
 aescrypt.a: aescrypt.c aes.h
 	$(CC) $(CFLAGS) -c $<
 
-sha1sum.a: sha1sum.c sha1.h
+sha1sum.a: sha1sum.c sha1.h cksumcommon.h
 	$(CC) $(CFLAGS) -c $<
 sha1test.a: sha1test.c sha1.h
 	$(CC) $(CFLAGS) -c $<
 
-sha256sum.a: sha256sum.c sha256.h
+sha256sum.a: sha256sum.c sha256.h cksumcommon.h
 	$(CC) $(CFLAGS) -c $<
 sha256test.a: sha256test.c sha256.h
 	$(CC) $(CFLAGS) -c $<
 
-md5sum.a: md5sum.c md5.h
+md5sum.a: md5sum.c md5.h cksumcommon.h
 	$(CC) $(CFLAGS) -c $<
 md5test.a: md5test.c md5.h
 	$(CC) $(CFLAGS) -c $<

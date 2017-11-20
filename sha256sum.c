@@ -14,42 +14,7 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include <stdlib.h>
-#include <stdio.h>
-#include <time.h>
 #include "sha256.h"
+#define HASH_FUNCTION sha256
+#include "cksumcommon.h"
 
-unsigned char buf[0x8000ul];
-
-int main(int argc, char **argv) {
-    struct sha256_context ctx;
-    FILE *file;
-    size_t count;
-    int i;
-
-    srand(time(NULL));
-
-    if (argc != 2)
-        return EXIT_FAILURE;
-
-    file = fopen(argv[1], "rb");
-    if (file == NULL)
-        return EXIT_FAILURE;
-    
-    sha256_init(&ctx);
-    do {
-        count = (rand() & 0x7FFF) + 1;
-        count = fread(buf, 1, count, file);
-        sha256_update(&ctx, buf, count);
-    } while (count != 0);
-    
-    fclose(file);
-    sha256_finalize(&ctx);
-    
-    for (i = 0; i < 32; i++) {
-        printf("%02x", ctx.hash[i]);
-    }
-    printf("\n");
-    
-    return 0;
-}
