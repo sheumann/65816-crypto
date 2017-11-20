@@ -38,12 +38,16 @@ int main(int argc, char **argv) {
 
     srand(time(NULL));
 
-    if (argc != 2)
+    if (argc != 2) {
+        fprintf(stderr, "Usage: %s filename\n", argv[0]);
         return EXIT_FAILURE;
+    }
 
     file = fopen(argv[1], "rb");
-    if (file == NULL)
+    if (file == NULL) {
+        perror(argv[1]);
         return EXIT_FAILURE;
+    }
     
     concat(HASH_FUNCTION,_init)(&ctx);
     do {
@@ -55,6 +59,10 @@ int main(int argc, char **argv) {
         count = fread(buf, 1, count, file);
         concat(HASH_FUNCTION,_update)(&ctx, buf, count);
     } while (count != 0);
+    
+    if (ferror(file)) {
+        fprintf(stderr, "Error reading file\n");
+    }
     
     fclose(file);
     concat(HASH_FUNCTION,_finalize)(&ctx);
