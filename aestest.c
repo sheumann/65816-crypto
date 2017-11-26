@@ -23,6 +23,8 @@
 
 #include "aes.h"
 
+/* Example vectors from FIPS 197, Advanced Encryption Standard (AES) */
+
 void print_hexbytes(char *prefix, unsigned char *data, unsigned int n) {
     int i;
     
