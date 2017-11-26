@@ -329,7 +329,7 @@ aes_encrypt start
 
 
 * Call with DP = AES context structure (with key expanded),
-*           DP = bank containing AES tables.
+*           DB = bank containing AES tables.
 AES_ENCRYPT start
 	using	tables
 
@@ -399,7 +399,7 @@ aes256_decrypt start
 	end
 
 * Call with DP = AES context structure (with key expanded),
-*           DP = bank containing AES tables.
+*           DB = bank containing AES tables.
 AES_DECRYPT start
 	using	tables
 	ShortRegs
