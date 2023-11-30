@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 Stephen Heumann
+ * Copyright (c) 2017,2023 Stephen Heumann
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -134,5 +134,8 @@ void md5_finalize(struct md5_context *context)
         pld
     }
 }
+
+#define HASH_ALG md5
+#include "hmacimpl.h"
 
 #append "md5.asm"

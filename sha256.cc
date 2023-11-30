@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 Stephen Heumann
+ * Copyright (c) 2017,2023 Stephen Heumann
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -203,5 +203,8 @@ void sha256_finalize(struct sha256_context *context)
         pld
     }
 }
+
+#define HASH_ALG sha256
+#include "hmacimpl.h"
 
 #append "sha256.asm"

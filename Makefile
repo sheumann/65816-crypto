@@ -4,7 +4,7 @@ CFLAGS = -O255 -w255
 LIBRARIES = lib65816crypto lib65816hash
 
 PROGRAMS = aescbctest aesctrtest aestest aescrypt sha1sum sha1test \
-           sha256sum sha256test md5sum md5test
+           sha256sum sha256test md5sum md5test hmactest
 
 .PHONY: default
 default: $(LIBRARIES) $(PROGRAMS)
@@ -21,15 +21,15 @@ aes.a: aes.asm aes.macros
 	mv aes.A aes.a
 
 # Hash algorithms
-sha1.a: sha1.cc sha1.h sha1.asm sha1.macros
+sha1.a: sha1.cc sha1.h sha1.asm sha1.macros hmacimpl.h
 	$(CC) $(CFLAGS) -c $<
 sha1.B: sha1.a
 
-sha256.a: sha256.cc sha1.h sha256.asm sha1.macros
+sha256.a: sha256.cc sha256.h sha256.asm sha256.macros hmacimpl.h
 	$(CC) $(CFLAGS) -c $<
 sha256.B: sha256.a
 
-md5.a: md5.cc md5.h md5.asm md5.macros
+md5.a: md5.cc md5.h md5.asm md5.macros hmacimpl.h
 	$(CC) $(CFLAGS) -c $<
 md5.B: md5.a
 
@@ -66,6 +66,9 @@ md5sum.a: md5sum.c md5.h cksumcommon.h
 md5test.a: md5test.c md5.h
 	$(CC) $(CFLAGS) -c $<
 
+hmactest.a: hmactest.c sha256.h sha1.h md5.h
+	$(CC) $(CFLAGS) -c $<
+
 aescbctest: aescbctest.a pagealign.root lib65816crypto
 	$(CC) $(CFLAGS) pagealign.root $< -L. -llib65816crypto -o $@
 aesctrtest: aesctrtest.a pagealign.root lib65816crypto
@@ -90,6 +93,8 @@ md5sum: md5sum.a pagealign.root lib65816hash
 md5test: md5test.a pagealign.root lib65816hash
 	$(CC) $(CFLAGS) pagealign.root $< -L. -llib65816hash -o $@
 
+hmactest: hmactest.a lib65816hash
+	$(CC) $(CFLAGS) pagealign.root $< -L. -llib65816hash -o $@
 
 .PHONY: clean
 clean:
