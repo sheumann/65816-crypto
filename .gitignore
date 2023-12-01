@@ -5,15 +5,8 @@
 *.root
 *.ROOT
 *.o
-sha1sum
-sha1test
-sha256sum
-sha256test
-md5sum
-md5test
-aestest
+*sum
+*test
 aescrypt
-aescbctest
-aesctrtest
 lib65816crypto
 lib65816hash
