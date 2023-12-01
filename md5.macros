@@ -334,7 +334,7 @@
 	mend
 
 
-* One part of the loop for processing blocks (20 iterations)
+* One part of the loop for processing blocks (16 iterations)
 	macro
 	BlockLoopPart &part
 
