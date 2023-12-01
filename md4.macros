@@ -1,0 +1,361 @@
+* Copyright (c) 2017,2023 Stephen Heumann
+*
+* Permission to use, copy, modify, and distribute this software for any
+* purpose with or without fee is hereby granted, provided that the above
+* copyright notice and this permission notice appear in all copies.
+*
+* THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+* WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+* MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+* ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+* WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+* ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+* OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+
+
+* Right-rotate 32-bit value in &loc (DP or 16-bit address) by &n positions
+	macro
+	ROTR4	&loc,&n
+	aif	&n>16,.dorotl
+	lda	&loc+2
+	lcla	&i
+&i	seta	&n
+.rotrloop
+	lsr	a		;to set carry
+	ror	&loc
+	ror	&loc+2
+&i	seta	&i-1
+	aif	&i>0,.rotrloop
+	ago	.end
+.dorotl
+	ROTL4	&loc,32-&n
+.end
+	mend
+
+* Expects the contents of &loc+2 to be loaded in A already
+	macro
+	ROTR4CONT &loc,&n
+	aif	&n>16,.dorotl
+	lcla	&i
+&i	seta	&n
+.rotrloop
+	lsr	a		;to set carry
+	ror	&loc
+	ror	&loc+2
+&i	seta	&i-1
+	aif	&i>0,.rotrloop
+	ago	.end
+.dorotl
+	ROTL4	&loc,32-&n
+.end
+	mend
+
+* Left-rotate 32-bit value in &loc (DP or 16-bit address) by &n positions
+	macro
+	ROTL4	&loc,&n
+	aif	&n>16,.dorotr2
+	lda	&loc
+	lcla	&i
+&i	seta	&n
+.rotlloop2
+	asl	a		;to set carry
+	rol	&loc+2
+	rol	&loc
+&i	seta	&i-1
+	aif	&i>0,.rotlloop2
+	ago	.end2
+.dorotr2
+	ROTR4	&loc,32-&n
+.end2
+	mend
+
+* Expects the contents of &loc to be loaded in A already
+	macro
+	ROTL4CONT &loc,&n
+	aif	&n>16,.dorotr2
+	lcla	&i
+&i	seta	&n
+.rotlloop2
+	asl	a		;to set carry
+	rol	&loc+2
+	rol	&loc
+&i	seta	&i-1
+	aif	&i>0,.rotlloop2
+	ago	.end2
+.dorotr2
+	ROTR4	&loc,32-&n
+.end2
+	mend
+
+* &to := &from ROTR4 &n
+	macro
+	ROTR4MOVE &to,&from,&n
+	aif	&n>16,.dorotl3
+	lda	&from
+	sta	&to
+	lda	&from+2
+	sta	&to+2
+	lcla	&i
+&i	seta	&n
+.rotrloop3
+	lsr	a		;to set carry
+	ror	&to
+	ror	&to+2
+&i	seta	&i-1
+	aif	&i>0,.rotrloop3
+	ago	.end3
+.dorotl3
+	ROTL4MOVE &to,&from,32-&n
+.end3
+	mend
+
+* &to := &from ROTL4 &n
+	macro
+	ROTL4MOVE &to,&from,&n
+	aif	&n>16,.dorotr4
+	lda	&from+2
+	sta	&to+2
+	lda	&from
+	sta	&to
+	lcla	&i
+&i	seta	&n
+.rotlloop4
+	asl	a		;to set carry
+	rol	&to+2
+	rol	&to
+&i	seta	&i-1
+	aif	&i>0,.rotlloop4
+	ago	.end4
+.dorotr4
+	ROTR4MOVE &to,&from,32-&n
+.end4
+	mend
+
+* Left-rotate with various optimizations applied
+	macro
+	ROTL4AUTO &loc,&n,&haveLocPlus2
+	aif	&n>4,.skip1
+	ROTL4	&loc,&n
+	mexit
+.skip1
+	aif	&n>7,.skip2
+	ldx	&loc+1
+	lda	&loc+3
+	ora	&loc-1
+	sta	&loc
+	stx	&loc+2
+	txa
+	ROTR4CONT &loc,8-&n
+	mexit
+.skip2
+	aif	&n>11,.skip3
+	ldx	&loc+1
+	lda	&loc+3
+	ora	&loc-1
+	sta	&loc
+	stx	&loc+2
+	ROTL4CONT &loc,&n-8
+	mexit
+.skip3
+	aif	&n>15,.skip4
+	aif	C:&haveLocPlus2>0,.noload1
+	ldy	&loc+2
+	ago	.didload1
+.noload1
+	tay
+.didload1
+	lda	&loc
+	sta	&loc+2
+	sty	&loc
+	ROTR4CONT &loc,16-&n
+	mexit
+.skip4
+	aif	&n>16,.skip5
+	aif	C:&haveLocPlus2>0,.noload2
+	lda	&loc+2
+.noload2
+	ldy	&loc
+	sta	&loc
+	sty	&loc+2
+	mexit
+.skip5
+	aif	&n>20,.skip6
+	aif	C:&haveLocPlus2>0,.noload2
+	lda	&loc+2
+.noload2
+	ldy	&loc
+	sta	&loc
+	sty	&loc+2
+	ROTL4CONT &loc,&n-16
+	mexit
+.skip6
+	ldx	&loc+1
+	lda	&loc+3
+	ora	&loc-1
+	sta	&loc+2
+	stx	&loc
+	ROTR4CONT &loc,24-&n
+	mend
+
+
+* This makes a function wrapper that is callable from C,
+* taking a pointer to the context structure as its argument.
+	macro
+	CFunction &fn
+	phb
+	plx
+	ply
+	tdc
+	pld
+	plb
+	plb
+	phy
+	phx
+	plb
+	pha
+	jsl	&fn
+	pld
+	rtl
+	mend
+
+
+* One iteration of the loop for processing blocks.
+* The a,b,c,d variables are given as parameters so we can avoid cycling them.
+* shift is a per-round shift amount.
+	macro
+	BlockLoopIter &a,&b,&c,&d,&shift
+
+* f_0 to f_15
+	aif	&part<>1,.skip1
+	lda	&c
+	eor	&d
+	and	&b
+	eor	&d
+	clc
+	adc	&a
+	sta	temp
+	
+	lda	&c+2
+	eor	&d+2
+	and	&b+2
+	eor	&d+2
+	adc	&a+2
+	sta	temp+2
+.skip1
+
+* f_16 to f_31
+	aif	&part<>2,.skip2
+	lda	&c
+	tax
+	ora	&d
+	and	&b
+	sta	temp
+	txa
+	and	&d
+	ora	temp
+	clc
+	adc	&a
+	tay
+	
+	lda	&c+2
+	tax
+	ora	&d+2
+	and	&b+2
+	sta	temp+2
+	txa
+	and	&d+2
+	ora	temp+2
+	adc	&a+2
+	tax
+
+	clc
+	tya
+	adc	#$7999
+	sta	temp
+	txa
+	adc	#$5A82
+	sta	temp+2
+.skip2
+
+* f_32 to f_47
+	aif	&part<>3,.skip3
+	lda	&b
+	eor	&c
+	eor	&d
+	clc
+	adc	&a
+	tay
+	
+	lda	&b+2
+	eor	&c+2
+	eor	&d+2
+	adc	&a+2
+	tax
+
+	clc
+	tya
+	adc	#$EBA1
+	sta	temp
+	txa
+	adc	#$6ED9
+	sta	temp+2
+.skip3
+
+	ldy	idx
+	ldx	g_times_4,y
+	lda	m,x
+	clc
+	adc	temp
+	sta	temp
+	inx
+	inx
+	lda	m,x
+	adc	temp+2
+	sta	temp+2
+	
+	iny
+	iny
+	sty	idx
+	
+	ROTL4AUTO temp,&shift,1
+	
+	lda	temp
+	sta	&a
+	lda	temp+2
+	sta	&a+2
+	
+	mend
+
+
+* One part of the loop for processing blocks (16 iterations)
+	macro
+	BlockLoopPart &part
+
+loop&part anop
+	
+	aif	&part<>1,.skip1a
+	BlockLoopIter a_,b,c,d,3
+	BlockLoopIter d,a_,b,c,7
+	BlockLoopIter c,d,a_,b,11
+	BlockLoopIter b,c,d,a_,19
+.skip1a
+	aif	&part<>2,.skip2a
+	BlockLoopIter a_,b,c,d,3
+	BlockLoopIter d,a_,b,c,5
+	BlockLoopIter c,d,a_,b,9
+	BlockLoopIter b,c,d,a_,13
+.skip2a
+	aif	&part<>3,.skip3a
+	BlockLoopIter a_,b,c,d,3
+	BlockLoopIter d,a_,b,c,9
+	BlockLoopIter c,d,a_,b,11
+	BlockLoopIter b,c,d,a_,15
+.skip3a
+
+	lda	idx
+	cmp	#16*2*&part
+	bge	endloop&part
+	jmp	loop&part
+endloop&part anop
+	mend
+

@@ -4,7 +4,7 @@ CFLAGS = -O255 -w255
 LIBRARIES = lib65816crypto lib65816hash
 
 PROGRAMS = aescbctest aesctrtest aestest aescrypt sha1sum sha1test \
-           sha256sum sha256test md5sum md5test hmactest
+           sha256sum sha256test md5sum md5test md4sum md4test hmactest
 
 .PHONY: default
 default: $(LIBRARIES) $(PROGRAMS)
@@ -33,11 +33,15 @@ md5.a: md5.cc md5.h md5.asm md5.macros hmacimpl.h
 	$(CC) $(CFLAGS) -c $<
 md5.B: md5.a
 
+md4.a: md4.cc md4.h md4.asm md4.macros hmacimpl.h
+	$(CC) $(CFLAGS) -c $<
+md4.B: md4.a
+
 # Libraries
 lib65816crypto: aesmodes.a aes.a
 	rm -f $@
 	iix makelib -P $@ $(patsubst %,+%,$^)
-lib65816hash: sha1.a sha1.B sha256.a sha256.B md5.a md5.B
+lib65816hash: sha1.a sha1.B sha256.a sha256.B md5.a md5.B md4.a md4.B
 	rm -f $@
 	iix makelib -P $@ $(patsubst %,+%,$^)
 
@@ -66,7 +70,12 @@ md5sum.a: md5sum.c md5.h cksumcommon.h
 md5test.a: md5test.c md5.h
 	$(CC) $(CFLAGS) -c $<
 
-hmactest.a: hmactest.c sha256.h sha1.h md5.h
+md4sum.a: md4sum.c md4.h cksumcommon.h
+	$(CC) $(CFLAGS) -c $<
+md4test.a: md4test.c md4.h
+	$(CC) $(CFLAGS) -c $<
+
+hmactest.a: hmactest.c sha256.h sha1.h md5.h md4.h
 	$(CC) $(CFLAGS) -c $<
 
 aescbctest: aescbctest.a pagealign.root lib65816crypto
@@ -91,6 +100,11 @@ sha256test: sha256test.a lib65816hash
 md5sum: md5sum.a pagealign.root lib65816hash
 	$(CC) $(CFLAGS) pagealign.root $< -L. -llib65816hash -o $@
 md5test: md5test.a pagealign.root lib65816hash
+	$(CC) $(CFLAGS) pagealign.root $< -L. -llib65816hash -o $@
+
+md4sum: md4sum.a pagealign.root lib65816hash
+	$(CC) $(CFLAGS) pagealign.root $< -L. -llib65816hash -o $@
+md4test: md4test.a pagealign.root lib65816hash
 	$(CC) $(CFLAGS) pagealign.root $< -L. -llib65816hash -o $@
 
 hmactest: hmactest.a lib65816hash

@@ -21,12 +21,14 @@
 #include "sha256.h"
 #include "sha1.h"
 #include "md5.h"
+#include "md4.h"
 
 int main(void) {
     Handle context_hndl;
     struct hmac_sha256_context *hmac_sha256_context;
     struct hmac_sha1_context *hmac_sha1_context;
     struct hmac_md5_context *hmac_md5_context;
+    struct hmac_md4_context *hmac_md4_context;
     
     char key[] = "key";
     char msg[] = "The quick brown fox jumps over the lazy dog";
@@ -66,6 +68,17 @@ int main(void) {
     printf("HMAC-MD5:    ");
     for (int i = 0; i < sizeof(hmac_md5_context->u[0].ctx.hash); i++) {
         printf("%02x", hmac_md5_context->u[0].ctx.hash[i]);
+    }
+    printf("\n");
+
+
+    hmac_md4_context = (struct hmac_md4_context *)*context_hndl;
+    hmac_md4_init(hmac_md4_context, key, sizeof(key)-1);
+    hmac_md4_compute(hmac_md4_context, msg, sizeof(msg)-1);
+    
+    printf("HMAC-MD4:    ");
+    for (int i = 0; i < sizeof(hmac_md4_context->u[0].ctx.hash); i++) {
+        printf("%02x", hmac_md4_context->u[0].ctx.hash[i]);
     }
     printf("\n");
 }
