@@ -48,7 +48,6 @@ int main(void) {
         printf("%02x", hmac_sha256_context->u[0].ctx.hash[i]);
     }
     printf("\n");
-    
         
     hmac_sha1_context = (struct hmac_sha1_context *)*context_hndl;
     hmac_sha1_init(hmac_sha1_context, key, sizeof(key)-1);
@@ -59,7 +58,6 @@ int main(void) {
         printf("%02x", hmac_sha1_context->u[0].ctx.hash[i]);
     }
     printf("\n");
-
 
     hmac_md5_context = (struct hmac_md5_context *)*context_hndl;
     hmac_md5_init(hmac_md5_context, key, sizeof(key)-1);
@@ -79,6 +77,17 @@ int main(void) {
     printf("HMAC-MD4:    ");
     for (int i = 0; i < sizeof(hmac_md4_context->u[0].ctx.hash); i++) {
         printf("%02x", hmac_md4_context->u[0].ctx.hash[i]);
+    }
+    printf("\n");
+
+    hmac_md5_init(hmac_md5_context, key, sizeof(key)-1);
+    hmac_md5_update(hmac_md5_context, "T", 1);
+    hmac_md5_update(hmac_md5_context, msg+1, sizeof(msg)-2);
+    hmac_md5_finalize(hmac_md5_context);
+    
+    printf("HMAC-MD5 (incremental calculation): ");
+    for (int i = 0; i < sizeof(hmac_md5_context->u[0].ctx.hash); i++) {
+        printf("%02x", hmac_md5_context->u[0].ctx.hash[i]);
     }
     printf("\n");
 }

@@ -31,15 +31,18 @@
 #define hash_finalize concat(HASH_ALG,_finalize)
 
 #define hmac_init     concat3(hmac_,HASH_ALG,_init)
+#define hmac_update   concat3(hmac_,HASH_ALG,_update)
+#define hmac_finalize concat3(hmac_,HASH_ALG,_finalize)
 #define hmac_compute  concat3(hmac_,HASH_ALG,_compute)
 #define hmac_context  concat3(hmac_,HASH_ALG,_context)
+
+#define BLOCK_SIZE sizeof(context->u[0].ctx.block)
+#define HASH_SIZE  sizeof(context->u[0].ctx.hash)
 
 void hmac_init(struct hmac_context *context,
                const unsigned char *key,
                unsigned long key_length)
 {
-#define BLOCK_SIZE sizeof(context->u[0].ctx.block)
-#define HASH_SIZE  sizeof(context->u[0].ctx.hash)
 
     unsigned i;
 
@@ -67,6 +70,30 @@ void hmac_init(struct hmac_context *context,
     // Save outer hash context following initial block as context->u[1].ctx
     hash_init(&context->u[1].ctx);
     hash_update(&context->u[1].ctx, context->u[0].k, BLOCK_SIZE);
+
+    // initialize context for use with hmac_update
+    context->u[0].ctx = context->u[2].ctx;
+}
+
+
+void hmac_update(struct hmac_context *context,
+               const unsigned char *message_part,
+               unsigned long part_length)
+{
+    hash_update(&context->u[0].ctx, message_part, part_length);
+}
+
+
+void hmac_finalize(struct hmac_context *context)
+{
+    // finalize inner hash
+    hash_finalize(&context->u[0].ctx);
+    memcpy(context->inner_hash, context->u[0].ctx.hash, HASH_SIZE);
+    
+    // Compute outer hash
+    context->u[0].ctx = context->u[1].ctx;
+    hash_update(&context->u[0].ctx, context->inner_hash, HASH_SIZE);
+    hash_finalize(&context->u[0].ctx);
 }
 
 

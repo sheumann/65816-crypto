@@ -60,17 +60,31 @@ void md5_processblock(struct md5_context *context);
 
 /*
  * Initialize a context for HMAC-MD5 computation with a specified key.
- * This must be called before any calls to hmac_md5_compute. After 
- * initialization, the context can be used to compute the HMAC for any
- * number of messages.
+ * This must be called before any other HMAC calls. After initialization,
+ * the context can be used with either hmac_md5_update/hmac_md5_finalize
+ * or hmac_md5_compute, but they should not be mixed.
  */
 void hmac_md5_init(struct hmac_md5_context *context,
                    const unsigned char *key,
                    unsigned long key_length);
 
 /*
- * Compute the HMAC-MD5 of a message, using an already-initialized context.
+ * Update an HMAC-MD5 context based on the specified data.
+ */
+void hmac_md5_update(struct hmac_md5_context *context,
+                     const unsigned char *message_part,
+                     unsigned long part_length);
+
+/*
+ * Finish HMAC-MD5 processing and generate the final HMAC.
  * The result will be in context->u[0].ctx.hash.
+ */
+void hmac_md5_finalize(struct hmac_md5_context *context);
+
+/*
+ * Compute the HMAC-MD5 of a message as a single operation.
+ * The result will be in context->u[0].ctx.hash.
+ * The context can be reused for multiple hmac_md5_compute operations.
  */
 void hmac_md5_compute(struct hmac_md5_context *context,
                       const unsigned char *message,
