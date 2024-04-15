@@ -77,15 +77,19 @@ void hmac_md4_update(struct hmac_md4_context *context,
 
 /*
  * Finish HMAC-MD4 processing and generate the final HMAC.
- * The result will be in context->u[0].ctx.hash.
  */
 void hmac_md4_finalize(struct hmac_md4_context *context);
 
 /*
  * Compute the HMAC-MD4 of a message as a single operation.
- * The result will be in context->u[0].ctx.hash.
  * The context can be reused for multiple hmac_md4_compute operations.
  */
 void hmac_md4_compute(struct hmac_md4_context *context,
                       const unsigned char *message,
                       unsigned long message_length);
+
+/*
+ * Get the result of an HMAC-MD4 computation following hmac_md4_finalize
+ * or hmac_md4_compute.
+ */
+#define hmac_md4_result(context) ((context)->u[0].ctx.hash)

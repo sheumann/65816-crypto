@@ -77,15 +77,19 @@ void hmac_md5_update(struct hmac_md5_context *context,
 
 /*
  * Finish HMAC-MD5 processing and generate the final HMAC.
- * The result will be in context->u[0].ctx.hash.
  */
 void hmac_md5_finalize(struct hmac_md5_context *context);
 
 /*
  * Compute the HMAC-MD5 of a message as a single operation.
- * The result will be in context->u[0].ctx.hash.
  * The context can be reused for multiple hmac_md5_compute operations.
  */
 void hmac_md5_compute(struct hmac_md5_context *context,
                       const unsigned char *message,
                       unsigned long message_length);
+
+/*
+ * Get the result of an HMAC-MD5 computation following hmac_md5_finalize
+ * or hmac_md5_compute.
+ */
+#define hmac_md5_result(context) ((context)->u[0].ctx.hash)

@@ -85,15 +85,19 @@ void hmac_sha256_update(struct hmac_sha256_context *context,
 
 /*
  * Finish HMAC-SHA256 processing and generate the final HMAC.
- * The result will be in context->u[0].ctx.hash.
  */
 void hmac_sha256_finalize(struct hmac_sha256_context *context);
 
 /*
  * Compute the HMAC-SHA256 of a message as a single operation.
- * The result will be in context->u[0].ctx.hash.
  * The context can be reused for multiple hmac_sha256_compute operations.
  */
 void hmac_sha256_compute(struct hmac_sha256_context *context,
                          const unsigned char *message,
                          unsigned long message_length);
+
+/*
+ * Get the result of an HMAC-SHA256 computation following hmac_sha256_finalize
+ * or hmac_sha256_compute.
+ */
+#define hmac_sha256_result(context) ((context)->u[0].ctx.hash)

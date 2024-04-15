@@ -77,15 +77,19 @@ void hmac_sha1_update(struct hmac_sha1_context *context,
 
 /*
  * Finish HMAC-SHA1 processing and generate the final HMAC.
- * The result will be in context->u[0].ctx.hash.
  */
 void hmac_sha1_finalize(struct hmac_sha1_context *context);
 
 /*
  * Compute the HMAC-SHA1 of a message as a single operation.
- * The result will be in context->u[0].ctx.hash.
  * The context can be reused for multiple hmac_sha1_compute operations.
  */
 void hmac_sha1_compute(struct hmac_sha1_context *context,
                        const unsigned char *message,
                        unsigned long message_length);
+
+/*
+ * Get the result of an HMAC-SHA1 computation following hmac_sha1_finalize
+ * or hmac_sha1_compute.
+ */
+#define hmac_sha1_result(context) ((context)->u[0].ctx.hash)
