@@ -21,6 +21,12 @@ struct aes_context {
 	unsigned char reserved2[16*13];
 };
 
+struct aes_cmac_context {
+	struct aes_context ctx;
+	unsigned char k1[16];
+	unsigned char k2[16];
+};
+
 /*
  * The context structure must be in bank 0, preferably page-aligned.
  * Note that a 256-byte (one page) context structure is sufficient for
@@ -90,3 +96,20 @@ void aes_ctr_process(struct aes_context *context,
                      unsigned char *out,
                      unsigned long nblocks,
                      const unsigned char *counter);
+
+/*
+ * Initialize a context for AES-CMAC computation with a specified key.
+ * This must be called before any calling aes_cmac_compute.
+ */
+void aes_cmac_init(struct aes_cmac_context *context,
+                   const unsigned char key[16]);
+
+/*
+ * Compute the AES-CMAC of a message as a single operation.
+ * The result will be in context->ctx.data.
+ * The context can be reused for multiple aes_cmac_compute operations.
+ */
+void aes_cmac_compute(struct aes_cmac_context *context,
+                      const unsigned char *message,
+                      unsigned long message_length);
+
