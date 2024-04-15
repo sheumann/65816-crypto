@@ -60,17 +60,31 @@ void md4_processblock(struct md4_context *context);
 
 /*
  * Initialize a context for HMAC-MD4 computation with a specified key.
- * This must be called before any calls to hmac_md4_compute. After 
- * initialization, the context can be used to compute the HMAC for any
- * number of messages.
+ * This must be called before any other HMAC calls. After initialization,
+ * the context can be used with either hmac_md4_update/hmac_md4_finalize
+ * or hmac_md4_compute, but they should not be mixed.
  */
 void hmac_md4_init(struct hmac_md4_context *context,
                    const unsigned char *key,
                    unsigned long key_length);
 
 /*
- * Compute the HMAC-MD4 of a message, using an already-initialized context.
+ * Update an HMAC-MD4 context based on the specified data.
+ */
+void hmac_md4_update(struct hmac_md4_context *context,
+                     const unsigned char *message_part,
+                     unsigned long part_length);
+
+/*
+ * Finish HMAC-MD4 processing and generate the final HMAC.
  * The result will be in context->u[0].ctx.hash.
+ */
+void hmac_md4_finalize(struct hmac_md4_context *context);
+
+/*
+ * Compute the HMAC-MD4 of a message as a single operation.
+ * The result will be in context->u[0].ctx.hash.
+ * The context can be reused for multiple hmac_md4_compute operations.
  */
 void hmac_md4_compute(struct hmac_md4_context *context,
                       const unsigned char *message,

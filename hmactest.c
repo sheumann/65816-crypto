@@ -80,6 +80,28 @@ int main(void) {
     }
     printf("\n");
 
+    hmac_sha256_init(hmac_sha256_context, key, sizeof(key)-1);
+    hmac_sha256_update(hmac_sha256_context, "T", 1);
+    hmac_sha256_update(hmac_sha256_context, msg+1, sizeof(msg)-2);
+    hmac_sha256_finalize(hmac_sha256_context);
+    
+    printf("HMAC-SHA256 (incremental calculation): ");
+    for (int i = 0; i < sizeof(hmac_sha256_context->u[0].ctx.hash); i++) {
+        printf("%02x", hmac_sha256_context->u[0].ctx.hash[i]);
+    }
+    printf("\n");
+
+    hmac_sha1_init(hmac_sha1_context, key, sizeof(key)-1);
+    hmac_sha1_update(hmac_sha1_context, "T", 1);
+    hmac_sha1_update(hmac_sha1_context, msg+1, sizeof(msg)-2);
+    hmac_sha1_finalize(hmac_sha1_context);
+    
+    printf("HMAC-SHA1 (incremental calculation): ");
+    for (int i = 0; i < sizeof(hmac_sha1_context->u[0].ctx.hash); i++) {
+        printf("%02x", hmac_sha1_context->u[0].ctx.hash[i]);
+    }
+    printf("\n");
+
     hmac_md5_init(hmac_md5_context, key, sizeof(key)-1);
     hmac_md5_update(hmac_md5_context, "T", 1);
     hmac_md5_update(hmac_md5_context, msg+1, sizeof(msg)-2);
@@ -88,6 +110,17 @@ int main(void) {
     printf("HMAC-MD5 (incremental calculation): ");
     for (int i = 0; i < sizeof(hmac_md5_context->u[0].ctx.hash); i++) {
         printf("%02x", hmac_md5_context->u[0].ctx.hash[i]);
+    }
+    printf("\n");
+
+    hmac_md4_init(hmac_md4_context, key, sizeof(key)-1);
+    hmac_md4_update(hmac_md4_context, "T", 1);
+    hmac_md4_update(hmac_md4_context, msg+1, sizeof(msg)-2);
+    hmac_md4_finalize(hmac_md4_context);
+    
+    printf("HMAC-MD4 (incremental calculation): ");
+    for (int i = 0; i < sizeof(hmac_md4_context->u[0].ctx.hash); i++) {
+        printf("%02x", hmac_md4_context->u[0].ctx.hash[i]);
     }
     printf("\n");
 }

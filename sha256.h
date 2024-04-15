@@ -68,17 +68,31 @@ void sha256_processblock(struct sha256_context *context);
 
 /*
  * Initialize a context for HMAC-SHA256 computation with a specified key.
- * This must be called before any calls to hmac_sha256_compute. After 
- * initialization, the context can be used to compute the HMAC for any
- * number of messages.
+ * This must be called before any other HMAC calls. After initialization,
+ * the context can be used with either hmac_sha256_update/hmac_sha256_finalize
+ * or hmac_sha256_compute, but they should not be mixed.
  */
 void hmac_sha256_init(struct hmac_sha256_context *context,
                       const unsigned char *key,
                       unsigned long key_length);
 
 /*
- * Compute the HMAC-SHA256 of a message, using an already-initialized context.
+ * Update an HMAC-SHA256 context based on the specified data.
+ */
+void hmac_sha256_update(struct hmac_sha256_context *context,
+                        const unsigned char *message_part,
+                        unsigned long part_length);
+
+/*
+ * Finish HMAC-SHA256 processing and generate the final HMAC.
  * The result will be in context->u[0].ctx.hash.
+ */
+void hmac_sha256_finalize(struct hmac_sha256_context *context);
+
+/*
+ * Compute the HMAC-SHA256 of a message as a single operation.
+ * The result will be in context->u[0].ctx.hash.
+ * The context can be reused for multiple hmac_sha256_compute operations.
  */
 void hmac_sha256_compute(struct hmac_sha256_context *context,
                          const unsigned char *message,
