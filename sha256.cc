@@ -207,4 +207,8 @@ void sha256_finalize(struct sha256_context *context)
 #define HASH_ALG sha256
 #include "hmacimpl.h"
 
+#define KDF_PRF hmac_sha256
+#define KDF_PRF_h 256
+#include "kdfimpl.h"
+
 #append "sha256.asm"

@@ -101,3 +101,19 @@ void hmac_sha256_compute(struct hmac_sha256_context *context,
  * or hmac_sha256_compute.
  */
 #define hmac_sha256_result(context) ((context)->u[0].ctx.hash)
+
+/*
+ * This implements "KDF in Counter Mode" as specified in NIST SP 800-108, with
+ * HMAC-SHA256 as the pseudo-random function.  See that specification for
+ * details of its parameters.
+ * 
+ * This implementation assumes r = 32 and assumes big-endian byte order is used
+ * for integers.  L must be a multiple of 8.  The result buffer must be L bits
+ * (i.e. L/8 bytes) long.  The HMAC-SHA256 context must be provided for use
+ * within this function; its state at the beginning and end is not meaningful.
+ */
+void hmac_sha256_kdf_ctr(struct hmac_sha256_context *ctx,
+                         const unsigned char *k_in, unsigned key_len,
+                         unsigned long L, unsigned char *result,
+                         const char *label, unsigned long label_len,
+                         const char *context, unsigned long context_len);

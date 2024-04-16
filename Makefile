@@ -31,7 +31,7 @@ sha1.a: sha1.cc sha1.h sha1.asm sha1.macros hmacimpl.h
 	$(CC) $(CFLAGS) -c $<
 sha1.B: sha1.a
 
-sha256.a: sha256.cc sha256.h sha256.asm sha256.macros hmacimpl.h
+sha256.a: sha256.cc sha256.h sha256.asm sha256.macros hmacimpl.h kdfimpl.h
 	$(CC) $(CFLAGS) -c $<
 sha256.B: sha256.a
 
