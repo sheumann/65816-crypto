@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 Stephen Heumann
+ * Copyright (c) 2017,2024 Stephen Heumann
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -22,9 +22,14 @@ struct aes_context {
 };
 
 struct aes_cmac_context {
-	struct aes_context ctx;
-	unsigned char k1[16];
-	unsigned char k2[16];
+	union {
+		struct aes_context ctx;
+		struct {
+			unsigned char padding[16+17+32+16*9];
+			unsigned char k1[16];
+			unsigned char k2[16];
+		};
+	};
 };
 
 /*
